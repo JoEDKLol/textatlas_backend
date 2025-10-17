@@ -86,6 +86,18 @@ const codes = [
     {code:"3071", msg:"사용자가 선택한 책의 저장한 문장 조회 실패", yn:"y"},
     {code:"3072", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3080", msg:"단어가 포함된 문장 번역 성공", yn:"y"},
+    {code:"3081", msg:"단어가 포함된 문장 번역 성공 실패", yn:"y"},
+    {code:"3082", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3090", msg:"단어 별포인트 업데이트 성공", yn:"y"},
+    {code:"3091", msg:"단어 별포인트 업데이트 실패", yn:"y"},
+    {code:"3092", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3100", msg:"문장 별포인트 업데이트 성공", yn:"y"},
+    {code:"3101", msg:"문장 별포인트 업데이트 실패", yn:"y"},
+    {code:"3102", msg:"Internal Server Error", yn:"y"},
+
     
 
 

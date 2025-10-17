@@ -30,9 +30,9 @@ historyRoute.get("/booklistsearch", getFields.none(), async (request, response) 
     }else{
 
       let keyword =  request.query.keyword; 
-      const currentPage = request.query.currentPage;
+      const listPage = request.query.listPage;
       const pageListCnt = commonModules.bookHisSearchPage; //10개씩 조회 
-      const skipPage = pageListCnt*(currentPage-1);
+      const skipPage = pageListCnt*(listPage-1);
       const userseq = parseInt(request.query.userseq);
       const userByTotalSearchYn = request.query.userByTotalSearchYn;
 
@@ -179,7 +179,9 @@ historyRoute.get("/booksavedwordsearch", getFields.none(), async (request, respo
       .sort({learningdt:-1})
       .lean()
       .skip(skipPage)
-      .limit(pageListCnt);
+      .limit(pageListCnt)
+      .populate('wordinfo', {_id:0, meaningKR:1, reworkmeaningKR:1, reworkynKR:1, meaningES:1, reworkmeaningES:1, reworkynES:1}).exec()
+      ;
       
       sendObj = commonModules.sendObjSet("3060", resObj);
     }
@@ -191,7 +193,7 @@ historyRoute.get("/booksavedwordsearch", getFields.none(), async (request, respo
     });
 
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     response.status(500).send(commonModules.sendObjSet("3062", error));
       
   }
@@ -210,7 +212,8 @@ historyRoute.get("/booksavedsentencesearch", getFields.none(), async (request, r
     }else{
 
       const currentPage = request.query.currentPage;
-      const pageListCnt = commonModules.bookSavedWordSearchPage; //10개씩 조회 
+      const pageListCnt = commonModules.bookSavedSentenceSearchPage; //10개씩 조회 
+      // const pageListCnt = 1
       const skipPage = pageListCnt*(currentPage-1);
       const userseq = parseInt(request.query.userseq);
       const book_seq = parseInt(request.query.book_seq);
@@ -239,6 +242,134 @@ historyRoute.get("/booksavedsentencesearch", getFields.none(), async (request, r
       
   }
 });
+
+//단어가 포함된 문장 번역
+historyRoute.get("/translatesentenceword", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+        
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+
+      const userseq = parseInt(request.query.userseq);
+      const book_seq = parseInt(request.query.book_seq);
+      const page = parseInt(request.query.page);
+      const sentenceindex = parseInt(request.query.sentenceindex);
+
+      // const resObj = await Learningsentences.findOne({
+      //   userseq:userseq,
+      //   book_seq:book_seq,
+      //   page:page,
+      //   sentenceindex:sentenceindex
+
+      // })
+
+      let booksDateF = await Books.findOne({book_seq:book_seq},
+        {
+          "pages":{ $slice: [page-1, 1] }, //1페이지씩 조회
+          "translator_kr":{ $slice: [page-1, 1] }, 
+          "translator_sp":{ $slice: [page-1, 1] },
+        }
+      ) 
+
+      const retObj = {
+        translatedsentenceKR:booksDateF.translator_kr[0].contentarr[sentenceindex].text,
+        translatedsentenceES:booksDateF.translator_sp[0].contentarr[sentenceindex].text,
+      }
+      ;
+      
+      sendObj = commonModules.sendObjSet("3080", retObj);
+    }
+
+    
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    // console.log(error);
+    response.status(500).send(commonModules.sendObjSet("3082", error));
+      
+  }
+});
+
+historyRoute.post("/wordimportance", getFields.none(), async (request, response) => {
+  try {
+
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+    
+      if(!chechAuthRes){
+        sendObj = commonModules.sendObjSet("2011");
+      }else{
+        const _id = new ObjectId(request.body._id);
+        const importance = parseInt(request.body.importance);
+        const email = request.body.email;
+        let date = new Date().toISOString();
+
+
+        const resLearningwords = await Learningwords.updateOne({
+          _id:_id
+        },{
+          "importance":importance,
+          "upddate":date,
+          "updUser":email
+        })
+        ;
+
+        sendObj = commonModules.sendObjSet("3090", resLearningwords);
+        
+      }
+    response.status(200).send({
+      sendObj
+    });
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3092", error));
+  }
+});
+
+historyRoute.post("/sentenceimportance", getFields.none(), async (request, response) => {
+  try {
+
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+    
+      if(!chechAuthRes){
+        sendObj = commonModules.sendObjSet("2011");
+      }else{
+        const _id = new ObjectId(request.body._id);
+        const importance = parseInt(request.body.importance);
+        const email = request.body.email;
+        let date = new Date().toISOString();
+
+
+        const resLearningsentences = await Learningsentences.updateOne({
+          _id:_id
+        },{
+          "importance":importance,
+          "upddate":date,
+          "updUser":email
+        })
+        ;
+
+        sendObj = commonModules.sendObjSet("3100", resLearningsentences);
+        
+      }
+    response.status(200).send({
+      sendObj
+    });
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3102", error));
+  }
+});
+
 
 
 module.exports=historyRoute
