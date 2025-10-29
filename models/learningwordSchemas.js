@@ -13,6 +13,12 @@ const getDateString = () => {
 };
 
 const LearningwordSchemas = mongoose.Schema({
+  
+  seq : {
+    type: Number,
+    index:{unique:true}
+  },
+  
   userseq : {
     type: Number,
     index:{unique:false}
@@ -22,7 +28,7 @@ const LearningwordSchemas = mongoose.Schema({
     type: Number,
     index:{unique:false}
   },
-
+  
   learningdt : {
     type: String,
     default: getDateString,
@@ -66,6 +72,13 @@ const LearningwordSchemas = mongoose.Schema({
 
   images : {
     type: Array,
+  },
+
+  //학습완료여부 체크되면 조회시 검색 안된다. 
+  learningyn : {
+    type:Boolean,
+    index: true,
+    default: false,
   },
   
   deleteyn : {

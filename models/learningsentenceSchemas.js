@@ -13,6 +13,12 @@ const getDateString = () => {
 };
 
 const LearningsentenceSchemas = mongoose.Schema({
+
+  seq : {
+    type: Number,
+    index:{unique:true}
+  },
+
   userseq : {
     type: Number,
     index:{unique:false}
@@ -39,6 +45,7 @@ const LearningsentenceSchemas = mongoose.Schema({
   
   sentence : {
     type: String,
+    text: true
   },
 
   translatedsentenceKR : {
@@ -57,11 +64,18 @@ const LearningsentenceSchemas = mongoose.Schema({
   // 2025 10 18 마이 히스토리 화면에서 검색을 위해서 추가 book_title, images
   book_title : {
     type: String,
-    text: true
+    
   },
 
   images : {
     type: Array,
+  },
+
+  //학습완료여부 체크되면 조회시 검색 안된다. 
+  learningyn : {
+    type:Boolean,
+    index: true,
+    default: false,
   },
 
   deleteyn : {

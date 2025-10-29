@@ -98,7 +98,21 @@ const codes = [
     {code:"3101", msg:"문장 별포인트 업데이트 실패", yn:"y"},
     {code:"3102", msg:"Internal Server Error", yn:"y"},
 
-    
+    {code:"3110", msg:"사용자가 저장한 단어 조회 성공", yn:"y"},
+    {code:"3111", msg:"사용자가 저장한 단어 조회 성공", yn:"y"},
+    {code:"3112", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3120", msg:"사용자가 저장한 문장 조회 성공", yn:"y"},
+    {code:"3121", msg:"사용자가 저장한 문장 조회 성공", yn:"y"},
+    {code:"3122", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3130", msg:"단어 학습완료 업데이트 성공", yn:"y"},
+    {code:"3131", msg:"단어 학습완료 업데이트 실패", yn:"y"},
+    {code:"3132", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3140", msg:"학습에서 단어 조회 성공", yn:"y"},
+    {code:"3141", msg:"학습에서 단어 조회 실패", yn:"y"},
+    {code:"3142", msg:"Internal Server Error", yn:"y"},
 
 
     //9000번대를 관리자페이지 관련 결과코드

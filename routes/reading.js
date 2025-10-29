@@ -9,7 +9,7 @@ const translate = require('../utils/translate');
 const Readinghistories = require("../models/readinghistorySchemas");
 const mongoose = require('mongoose'); // mongoose import
 const checkAuth = require('../utils/checkAuth');
-
+const sequence = require("../utils/sequences");
 const Dictionaries = require("../models/dictionarySchemas");
 const Learningwords = require("../models/learningwordSchemas");
 const Learningsentences = require("../models/learningsentenceSchemas");
@@ -404,7 +404,7 @@ readingRoute.post("/translationword", getFields.none(), async (request, response
 
 readingRoute.post("/saveword", getFields.none(), async (request, response) => {
   try {
-
+    // console.log("?????????????????");
     let sendObj = {};
 
     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
@@ -412,7 +412,7 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
       if(!chechAuthRes){
         sendObj = commonModules.sendObjSet("2011");
       }else{
-
+        console.log("111111111111111");
         const session = await mongoose.startSession();
         session.startTransaction();
 
@@ -440,8 +440,8 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
           reguser:email,
           upduser:email, 
         }
-
-        const resultLearningwords = await Learningwords.findOne(
+        console.log("222222222222");
+        const resultLearningwords = await Learningwords.findOne( 
           {
             userseq:userseq, 
             book_seq:book_seq,
@@ -450,8 +450,11 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
             word:word.toLowerCase(),
           }
         ); 
-
+        console.log("3333333333333");
         if(!resultLearningwords){
+          console.log("4444444444444");
+          const learnword_seq = await sequence.getSequence("learnword_seq");
+          wordObj.seq = learnword_seq;
           const newLearningwords =new Learningwords(wordObj);
           let resLearningwords=await newLearningwords.save();
 
@@ -502,6 +505,8 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
         // await session.commitTransaction();
         // session.endSession();
 
+        
+
         await session.commitTransaction();
         session.endSession();
 
@@ -516,7 +521,7 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
-    // console.log(error);
+    console.log(error);
     response.status(500).send(commonModules.sendObjSet("1202", error));
   }
 });
@@ -572,6 +577,8 @@ readingRoute.post("/savesentence", getFields.none(), async (request, response) =
         ); 
 
         if(!resultLearningsentences){
+          const learnsentence_seq = await sequence.getSequence("learnsentence_seq");
+          wordObj.seq = learnsentence_seq;
           const newLearningsentences =new Learningsentences(wordObj);
           let resLearningsentences=await newLearningsentences.save();
 
