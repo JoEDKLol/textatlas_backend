@@ -1,8 +1,9 @@
 
 const readingPage = 20;
-const bookHisSearchPage = 10; //사용자별 히스토리에서 읽은 책 리스트 조회 리스트
+const bookHisSearchPage = 12; //사용자별 히스토리에서 읽은 책 리스트 조회 리스트
 const bookSavedWordSearchPage = 10; //사용자별 히스토리에서 선택한 책의 저장한 단어 리스트 조회
 const bookSavedSentenceSearchPage = 10; //사용자별 히스토리에서 선택한 책의 저장한 문장 리스트 조회
+const communitySearchPage = 10; //등록한 커뮤니티 글 리스트 조회
 const dictionarySearchPage = 20;
 const commentPage = 5;
 const replyPage = 5;
@@ -114,6 +115,30 @@ const codes = [
     {code:"3141", msg:"학습에서 단어 조회 실패", yn:"y"},
     {code:"3142", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3150", msg:"학습에서 단어 건수 조회 성공", yn:"y"},
+    {code:"3151", msg:"학습에서 단어 건수 조회 실패", yn:"y"},
+    {code:"3152", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3160", msg:"학습에서 문장 조회 성공", yn:"y"},
+    {code:"3161", msg:"학습에서 문장 조회 실패", yn:"y"},
+    {code:"3162", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3170", msg:"학습에서 문장 건수 조회 성공", yn:"y"},
+    {code:"3171", msg:"학습에서 문장 건수 조회 실패", yn:"y"},
+    {code:"3172", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3180", msg:"글쓰기 저장 성공", yn:"y"},
+    {code:"3181", msg:"글쓰기 저장 실패", yn:"y"},
+    {code:"3182", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3190", msg:"커뮤니티 글쓰기 조회 성공", yn:"y"},
+    {code:"3191", msg:"커뮤니티 글쓰기 조회 실패", yn:"y"},
+    {code:"3192", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3200", msg:"태그 조회 성공", yn:"y"},
+    {code:"3201", msg:"태그 조회 실패", yn:"y"},
+    {code:"3202", msg:"Internal Server Error", yn:"y"},
+
 
     //9000번대를 관리자페이지 관련 결과코드
     {code:"9000", msg:"코드 조회 성공.", yn:"y"},
@@ -135,6 +160,12 @@ const codes = [
     {code:"9050", msg:"wordlist 다건 save 성공.", yn:"y"},
     {code:"9051", msg:"wordlist 다건 save 실패", yn:"n"},
     {code:"9052", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9100", msg:"Image save success.", yn:"y"},
+    {code:"9101", msg:"Image save failed", yn:"n"},
+    {code:"9102", msg:"Internal Server Error", yn:"n"},
+
+
 ]
 
 function sendObjSet(code, resObj) {
@@ -230,6 +261,7 @@ module.exports.readingPage = readingPage;
 module.exports.commentPage = commentPage;
 module.exports.replyPage = replyPage;
 module.exports.bookHisSearchPage = bookHisSearchPage;
+module.exports.communitySearchPage = communitySearchPage;
 
 module.exports.bookSavedWordSearchPage = bookSavedWordSearchPage;
 module.exports.bookSavedSentenceSearchPage = bookSavedSentenceSearchPage;

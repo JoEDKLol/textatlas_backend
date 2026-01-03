@@ -404,7 +404,7 @@ readingRoute.post("/translationword", getFields.none(), async (request, response
 
 readingRoute.post("/saveword", getFields.none(), async (request, response) => {
   try {
-    // console.log("?????????????????");
+
     let sendObj = {};
 
     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
@@ -412,7 +412,6 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
       if(!chechAuthRes){
         sendObj = commonModules.sendObjSet("2011");
       }else{
-        console.log("111111111111111");
         const session = await mongoose.startSession();
         session.startTransaction();
 
@@ -440,7 +439,6 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
           reguser:email,
           upduser:email, 
         }
-        console.log("222222222222");
         const resultLearningwords = await Learningwords.findOne( 
           {
             userseq:userseq, 
@@ -450,9 +448,7 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
             word:word.toLowerCase(),
           }
         ); 
-        console.log("3333333333333");
         if(!resultLearningwords){
-          console.log("4444444444444");
           const learnword_seq = await sequence.getSequence("learnword_seq");
           wordObj.seq = learnword_seq;
           const newLearningwords =new Learningwords(wordObj);

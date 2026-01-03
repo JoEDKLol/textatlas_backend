@@ -64,7 +64,6 @@ const LearningsentenceSchemas = mongoose.Schema({
   // 2025 10 18 마이 히스토리 화면에서 검색을 위해서 추가 book_title, images
   book_title : {
     type: String,
-    
   },
 
   images : {

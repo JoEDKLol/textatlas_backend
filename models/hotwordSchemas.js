@@ -42,7 +42,6 @@ const HotwordSchemas = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     required: true,
     ref: "dictionary", 
-    index:true
   },
 
   sentence : {

@@ -12,71 +12,37 @@ const getDateString = () => {
   return `${yyyy}${mm}${dd}${hours}${minutes}${seconds}`; // e.g., "20250430000000"
 };
 
-const LearningwordSchemas = mongoose.Schema({
+const CommentSchemas = mongoose.Schema({
   
-  seq : {
+  comment_seq : {
     type: Number,
     index:{unique:true}
+  },
+
+  community_seq : {
+    type: Number,
+    index:{unique:false}
   },
   
   userseq : {
     type: Number,
     index:{unique:false}
   },
-
-  book_seq : {
-    type: Number,
-    index:{unique:false}
-  },
   
-  learningdt : {
-    type: String,
-    default: getDateString,
-    index: true // 검색 성능 향상 
-  },
-
-  page : {
-    type: Number,
-  },
-
-  sentenceindex : {
-    type: Number,
-  },
-
-  word : {
-    type: String,
-    index:{unique:false}
-  },
-
-  wordinfo   : {
+  userinfo   : {
     type: mongoose.Schema.Types.ObjectId, 
     required: true,
-    ref: "dictionary", 
+    ref: "user", 
   },
 
-  sentence : { //단어가 포함된 문장
+  communityinfo   : {
+    type: mongoose.Schema.Types.ObjectId, 
+    required: true,
+    ref: "community", 
+  },
+
+  comment : { 
     type: String,
-  },
-
-  importance : { //별표
-    type: Number,
-    default: 0
-  },
-
-  // 2025 10 18 마이 히스토리 화면에서 검색을 위해서 추가 book_title, images
-  book_title : {
-    type: String,
-  },
-
-  images : { //책에 대한 이미지
-    type: Array,
-  },
-
-  //학습완료여부 체크되면 조회시 검색 안된다. 
-  learningyn : {
-    type:Boolean,
-    index: true,
-    default: false,
   },
   
   deleteyn : {
@@ -105,5 +71,5 @@ const LearningwordSchemas = mongoose.Schema({
 
 
 
-const Learningwords=mongoose.model('learningword',LearningwordSchemas)
-module.exports=Learningwords
+const Comments=mongoose.model('comment',CommentSchemas)
+module.exports=Comments

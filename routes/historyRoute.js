@@ -554,7 +554,7 @@ historyRoute.post("/wordlearningfinish", getFields.none(), async (request, respo
 
 
 //학습 단어 조회
-historyRoute.get("/learnWordsearch", getFields.none(), async (request, response) => {
+historyRoute.get("/learnwordsearch", getFields.none(), async (request, response) => {
   try {
       
     let sendObj = {};
@@ -565,7 +565,7 @@ historyRoute.get("/learnWordsearch", getFields.none(), async (request, response)
       sendObj = commonModules.sendObjSet("2011");
     }else{
 
-      const currentPage = request.query.currentPage;
+      // const currentPage = request.query.currentPage;
       const pageListCnt = commonModules.bookSavedWordSearchPage; //10개씩 조회 
       // const skipPage = pageListCnt*(currentPage-1);
       const userseq = parseInt(request.query.userseq);
@@ -607,8 +607,6 @@ historyRoute.get("/learnWordsearch", getFields.none(), async (request, response)
         searchCondition.seq = {"$lt":lastSeq}
       }
 
-      console.log(searchCondition);
-      
       const resObj = await Learningwords.find(
         searchCondition
       )
@@ -616,7 +614,6 @@ historyRoute.get("/learnWordsearch", getFields.none(), async (request, response)
       .limit(pageListCnt)
       .populate('wordinfo', {_id:0, meaningKR:1, reworkmeaningKR:1, reworkynKR:1, meaningES:1, reworkmeaningES:1, reworkynES:1}).exec()
       ;
-
 
       sendObj = commonModules.sendObjSet("3140", resObj);
     }
@@ -629,6 +626,216 @@ historyRoute.get("/learnWordsearch", getFields.none(), async (request, response)
     // console.log(error);
     response.status(500).send(commonModules.sendObjSet("3142", error));
       
+  }
+});
+
+//학습 단어 건수 조회 탭 이동시 조회됨 
+historyRoute.get("/learnwordcntsearch", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+        
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+
+      const userseq = parseInt(request.query.userseq);
+
+      // console.log(searchCondition);
+      //전체 건수
+      let userbywordtotalcnt = await Learningwords.countDocuments(
+        {userseq:userseq}
+      );
+
+      let userbywordcnt = await Learningwords.countDocuments( //학습 중인 단어 건수
+        {userseq:userseq, learningyn:false}
+      );
+
+      let userbywordlearnedcnt = await Learningwords.countDocuments( //학습 완료 단어 건수
+        {userseq:userseq, learningyn:true}
+      );
+      
+      
+
+      const obj = {
+        userbywordtotalcnt:userbywordtotalcnt,
+        userbywordcnt:userbywordcnt,
+        userbywordlearnedcnt:userbywordlearnedcnt,
+      }
+
+      sendObj = commonModules.sendObjSet("3150", obj);
+    }
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3152", error));
+      
+  }
+});
+
+//학습 문장 조회
+historyRoute.get("/learnsentencesearch", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+        
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+
+      const pageListCnt = commonModules.bookSavedSentenceSearchPage; //10개씩 조회 
+      const userseq = parseInt(request.query.userseq);
+      const keyword = request.query.keyword;
+      const orderType = parseInt(request.query.orderType);
+      const learningyn = request.query.learningyn; //학습완료여부
+      const lastSeq = parseInt(request.query.lastSeq); //직전 조회의 마지막 seq 
+      
+      let orderTypeObj = {
+        learningdt:-1
+      }
+
+      if(orderType === 1){ //오름차순
+        orderTypeObj = {
+          importance:-1,
+          learningdt:-1
+        }
+      }else if(orderType === 2){ //내림차순
+        orderTypeObj = {
+          importance:1,
+          learningdt:-1
+        }
+      }
+
+      let searchCondition;
+
+      if(keyword){
+        searchCondition = {
+           $text:{$search:keyword},
+        }
+      }else{
+        searchCondition = {}
+      }
+
+      searchCondition.userseq = userseq;
+      searchCondition.learningyn = learningyn;
+
+      if(lastSeq > 0){
+        searchCondition.seq = {"$lt":lastSeq}
+      }
+      
+      const resObj = await Learningsentences.find(
+        searchCondition
+      )
+      .sort(orderTypeObj)
+      .limit(pageListCnt)
+      ;
+
+
+      sendObj = commonModules.sendObjSet("3160", resObj);
+    }
+
+    
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3162", error));
+      
+  }
+});
+
+//학습 문장 건수 조회 탭 이동시 조회됨 
+historyRoute.get("/learnsentencecntsearch", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+        
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+
+      const userseq = parseInt(request.query.userseq);
+
+      // console.log(searchCondition);
+      //전체 건수
+      let userbysentencetotalcnt = await Learningsentences.countDocuments(
+        {userseq:userseq}
+      );
+
+      let userbysentencecnt = await Learningsentences.countDocuments( //학습 중인 단어 건수
+        {userseq:userseq, learningyn:false}
+      );
+
+      let userbysentencelearnedcnt = await Learningsentences.countDocuments( //학습 완료 단어 건수
+        {userseq:userseq, learningyn:true}
+      );
+      
+      
+
+      const obj = {
+        userbysentencetotalcnt:userbysentencetotalcnt,
+        userbysentencecnt:userbysentencecnt,
+        userbysentencelearnedcnt:userbysentencelearnedcnt,
+      }
+
+      sendObj = commonModules.sendObjSet("3170", obj);
+    }
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3172", error));
+      
+  }
+});
+
+
+
+//문장 학습완료업데이트
+historyRoute.post("/sentencelearningfinish", getFields.none(), async (request, response) => {
+  try {
+
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+    
+      if(!chechAuthRes){
+        sendObj = commonModules.sendObjSet("2011");
+      }else{
+        const _id = new ObjectId(request.body._id);
+        const email = request.body.email;
+        let date = new Date().toISOString();
+
+        const resLearningsentences = await Learningsentences.updateOne({
+          _id:_id
+        },{
+          "learningyn":true,
+          "upddate":date,
+          "updUser":email
+        })
+        ;
+
+        sendObj = commonModules.sendObjSet("3130");
+        
+      }
+    response.status(200).send({
+      sendObj
+    });
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3132", error));
   }
 });
 

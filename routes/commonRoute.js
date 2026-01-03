@@ -16,7 +16,6 @@ commonRoute.get("/getlanguageset", getFields.none(), async (request, response) =
       let sendObj = {};
       let resLanguages = await Languages.findOne();
 
-      console.log(resLanguages);
       sendObj = commonModules.sendObjSet("9010", resLanguages);
       response.status(200).send({
           sendObj
