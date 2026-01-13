@@ -19,6 +19,11 @@ const CommentSchemas = mongoose.Schema({
     index:{unique:true}
   },
 
+  subcomment_seq : {
+    type: Number,
+    index:{unique:true}
+  },
+
   community_seq : {
     type: Number,
     index:{unique:false}
@@ -29,6 +34,10 @@ const CommentSchemas = mongoose.Schema({
     index:{unique:false}
   },
   
+  subcommentyn : {
+    type: Boolean,
+  },
+
   userinfo   : {
     type: mongoose.Schema.Types.ObjectId, 
     required: true,
@@ -43,6 +52,11 @@ const CommentSchemas = mongoose.Schema({
 
   comment : { 
     type: String,
+  },
+
+  likecnt : {
+    type:Number,
+    default: 0
   },
   
   deleteyn : {

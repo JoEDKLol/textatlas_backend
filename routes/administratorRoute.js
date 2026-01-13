@@ -459,7 +459,7 @@ administratorRoute.post("/administratorwordlistsavees", getFields.none(), async 
           }
 
           const newDictionaries =new Dictionaries(dictionarykrsObj);
-          let resDictionarykrs=await newDictionarykrs.save();
+          let resDictionarykrs=await newDictionaries.save();
         }else{
           let upRes = await Dictionaries.updateOne(
           {

@@ -17,6 +17,10 @@ const CommunityLikeSchemas = mongoose.Schema({
       required: true,
       ref: "community", 
     },
+
+    likeyn : {
+      type: Boolean,  
+    },
     
     deleteyn : {
         type: String,

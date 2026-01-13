@@ -139,6 +139,18 @@ const codes = [
     {code:"3201", msg:"태그 조회 실패", yn:"y"},
     {code:"3202", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3210", msg:"커뮤니티글 상세 조회 성공", yn:"y"},
+    {code:"3211", msg:"커뮤니티글 상세 조회 실패", yn:"y"},
+    {code:"3212", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3220", msg:"커뮤니티글 좋아요 (사용자별) 조회 성공", yn:"y"},
+    {code:"3221", msg:"커뮤니티글 좋아요 (사용자별) 조회 실패", yn:"y"},
+    {code:"3222", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3230", msg:"커뮤니티글 좋아요 (사용자별) 업데이트 성공", yn:"y"},
+    {code:"3231", msg:"커뮤니티글 좋아요 (사용자별) 업데이트 실패", yn:"y"},
+    {code:"3232", msg:"Internal Server Error", yn:"y"},
+
 
     //9000번대를 관리자페이지 관련 결과코드
     {code:"9000", msg:"코드 조회 성공.", yn:"y"},

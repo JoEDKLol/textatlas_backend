@@ -19,6 +19,7 @@ const Hotwords = require('../models/hotwordSchemas');
 const sequence = require("../utils/sequences");
 const Communities = require('../models/communitySchemas');
 const Hashtags = require('../models/hashtagSchemas'); 
+const CommunityLikes = require('../models/communityLikeSchemas');
 
 //파일 업로드
 const s3Uploader = require('../utils/s3Upload');
@@ -93,79 +94,79 @@ communityRoute.post("/savecommunitywriting", getFields.none(), async (request, r
 
     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
     
-      if(!chechAuthRes){
-        sendObj = commonModules.sendObjSet("2011");
-      }else{
-        // Communities //
-        const session = await mongoose.startSession();
-        const userseq = request.body.userseq;
-        const userinfo = new ObjectId(request.body.userinfo);;
-        const title = request.body.title;
-        const contents = request.body.contents;
-        const hashtags = request.body.hashtags;
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+      // Communities //
+      const session = await mongoose.startSession();
+      const userseq = request.body.userseq;
+      const userinfo = new ObjectId(request.body.userinfo);;
+      const title = request.body.title;
+      const contents = request.body.contents;
+      const hashtags = request.body.hashtags;
 
-        const community_seq = await sequence.getSequence("community_seq");
-        session.startTransaction(); // 트랜잭션을 시작합니다.
-        // console.log(community_seq);
-        
-        const communityObj = {
-          community_seq:community_seq,
-          userseq:userseq,
-          userinfo:userinfo,
-          title:title,
-          contents:contents,
-          hashtags:hashtags,
-          reguser:request.body.email,
-          upduser:request.body.email,
+      const community_seq = await sequence.getSequence("community_seq");
+      session.startTransaction(); // 트랜잭션을 시작합니다.
+      // console.log(community_seq);
+      
+      const communityObj = {
+        community_seq:community_seq,
+        userseq:userseq,
+        userinfo:userinfo,
+        title:title,
+        contents:contents,
+        hashtags:hashtags,
+        reguser:request.body.email,
+        upduser:request.body.email,
+
+      }
+
+      const newCommunities =new Communities(communityObj);
+      let resCommunities=await newCommunities.save();
+
+      //hashtag 저장
+      if(hashtags.length > 0){
+
+        let hashtagObjArr = new Array();
+
+        for(let i=0; i<hashtags.length; i++){
+          const tagName = hashtags[i];
+          const obj = {
+            tagname:hashtags[i],
+            community_seq:community_seq,
+            reguser:request.body.email,
+            upduser:request.body.email,
+          }
+
+          hashtagObjArr.push(obj);
+          //동일한 tag가 있는 경우 건수를 증가시킨다.
+          const resTags = await Tags.findOneAndUpdate(
+            { tagname: tagName }, // 찾을 조건 (Query)
+            {
+              "$inc": {"cnt": 1}, 
+            },  // 업데이트할 내용 ($set 연산자 사용 권장)
+            { upsert: true } // 옵션: 새 문서 반환, upsert 활성화
+          );
 
         }
+        const resHashTags = await Hashtags.insertMany(hashtagObjArr);
 
-        const newCommunities =new Communities(communityObj);
-        let resCommunities=await newCommunities.save();
-
-        //hashtag 저장
-        if(hashtags.length > 0){
-
-          let hashtagObjArr = new Array();
-
-          for(let i=0; i<hashtags.length; i++){
-            const tagName = hashtags[i];
-            const obj = {
-              tagname:hashtags[i],
-              community_seq:community_seq,
-              reguser:request.body.email,
-              upduser:request.body.email,
-            }
-
-            hashtagObjArr.push(obj);
-            //동일한 tag가 있는 경우 건수를 증가시킨다.
-            const resTags = await Tags.findOneAndUpdate(
-              { tagname: tagName }, // 찾을 조건 (Query)
-              {
-                "$inc": {"cnt": 1}, 
-              },  // 업데이트할 내용 ($set 연산자 사용 권장)
-              { upsert: true } // 옵션: 새 문서 반환, upsert 활성화
-            );
-
-          }
-          const resHashTags = await Hashtags.insertMany(hashtagObjArr);
-
-         
- 
-        } 
-
-        sendObj = commonModules.sendObjSet("3180");
-        ;
-
-        await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
-        session.endSession(); // 세션을 종료합니다.
         
-      }
+
+      } 
+
+      sendObj = commonModules.sendObjSet("3180");
+      ;
+
+      await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
+      session.endSession(); // 세션을 종료합니다.
+      
+    }
+
     response.status(200).send({
       sendObj
     });
   } catch (error) {
-    console.log(error);
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
@@ -174,29 +175,53 @@ communityRoute.post("/savecommunitywriting", getFields.none(), async (request, r
 });
 
 //커뮤니티 글 리스트 조회
-communityRoute.get("/communitylistsearch", getFields.none(), async (request, response) => {
+communityRoute.post("/communitylistsearch", getFields.none(), async (request, response) => {
   try {
       
     let sendObj = {};
 
     const pageListCnt = commonModules.communitySearchPage; //10개씩 조회 
-    const keyword = request.query.keyword;
-    const lastSeq = parseInt(request.query.lastSeq); //직전 조회의 마지막 seq 
+    const keyword = request.body.keyword;
+    const lastSeq = parseInt(request.body.lastSeq); //직전 조회의 마지막 seq
+    const tagYn = request.body.tagYn;
+    const searchTagList = request.body.searchTagList;
+    
+
+    // console.log(tagYn); //태그 조회 여부
+    // console.log(searchTagList); //조회 태그 리스트ㄴ
     
     
     let searchCondition;
 
     if(keyword){
       searchCondition = {
-          $text:{$search:keyword},
+        $text:{$search:keyword},
       }
     }else{
       searchCondition = {}
     }
+
+    if(searchTagList.length > 0){
+      const communitySeqObjList = await Hashtags.find({tagname: { $in: searchTagList } })
+      
+      if(communitySeqObjList.length > 0){
+        
+        let communitySeqList = new Array;
+        for(let i =0; i<communitySeqObjList.length; i++){
+          communitySeqList.push(communitySeqObjList[i].community_seq);
+        }
+
+        searchCondition.community_seq = {$in: communitySeqList}
+      }
+      
+    }
+
     
     if(lastSeq > 0){
-      searchCondition.community_seq = {"$lt":lastSeq}
+      searchCondition.community_seq = {...searchCondition.community_seq, "$lt":lastSeq}
     }
+
+    console.log(searchCondition);
     
     const resObj = await Communities.find(
       searchCondition
@@ -248,6 +273,141 @@ communityRoute.get("/taglistsearch", getFields.none(), async (request, response)
       
   }
 });
+
+//커뮤니티 글 리스트 상세조회
+communityRoute.get("/communitydetailsearch", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+    const community_seq = parseInt(request.query.community_seq);
+    const resObj = await Communities.findOne(
+      {community_seq:community_seq}
+    )
+    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    ;
+
+    sendObj = commonModules.sendObjSet("3210", resObj);
+
+    response.status(200).send({
+        sendObj
+    });
+
+    //좋아요 클릭 조회
+
+  } catch (error) {
+    // console.log(error);
+    response.status(500).send(commonModules.sendObjSet("3212", error));
+  }
+});
+
+//커뮤니티 글 좋아요 조회 사용자별
+communityRoute.get("/communitylikebyuser", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+    const community_seq = parseInt(request.query.community_seq);
+    const userseq = parseInt(request.query.userseq);
+    ;
+
+    
+
+    const resObj = await CommunityLikes.findOne(
+      {
+        community_seq:community_seq,
+        userseq:userseq
+      }
+    )
+
+    sendObj = commonModules.sendObjSet("3220", resObj);
+    response.status(200).send({
+        sendObj
+    });
+
+    //좋아요 클릭 조회
+
+  } catch (error) {
+    // console.log(error);
+    response.status(500).send(commonModules.sendObjSet("3222", error));
+  }
+});
+
+//커뮤니티 글 좋아요 업데이트
+communityRoute.post("/communitylikeupdate", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+    const session = await mongoose.startSession();
+    const community_seq = parseInt(request.body.community_seq);
+    const userseq = parseInt(request.body.userseq);
+    const email = request.body.email;
+    const likeyn = request.body.likeyn;
+    
+    const resObj = await CommunityLikes.findOne(
+      {
+        community_seq:community_seq,
+        userseq:userseq
+      }
+    )
+
+    session.startTransaction(); // 트랜잭션을 시작합니다.
+
+    if(resObj){ //업데이트
+      let upRes = await CommunityLikes.updateOne({
+        community_seq:community_seq,
+        userseq:userseq
+      },
+      {  likeyn: likeyn })
+    }else{ //insert
+      const communityLikeObj = {
+        community_seq:community_seq,
+        userseq:userseq,
+        communityinfo:new ObjectId(request.body.community_id),
+        likeyn:true,
+        reguser:request.body.email,
+        upduser:request.body.email,
+
+      }
+
+      const newCommunityLikes =new CommunityLikes(communityLikeObj);
+      let resCommunities=await newCommunityLikes.save();
+    }
+
+    let likecntPM;
+    if(likeyn){
+      likecntPM = 1;
+    }else{
+      likecntPM = -1
+    }
+    let upRes = await Communities.findOneAndUpdate({community_seq:community_seq}
+      ,{ $inc: { likecnt: likecntPM } }
+      ,{ new: true }
+    )
+
+
+    const obj = {
+      likeyn:likeyn,
+      likecnt:upRes.likecnt
+    }
+
+    sendObj = commonModules.sendObjSet("3230", obj);
+
+    
+
+    response.status(200).send({
+        sendObj
+    });
+
+    await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
+    session.endSession(); // 세션을 종료합니다.
+
+  } catch (error) {
+    if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
+      await session.abortTransaction();
+    }
+    response.status(500).send(commonModules.sendObjSet("3232", error));
+  }
+});
+
 
 
 module.exports=communityRoute
