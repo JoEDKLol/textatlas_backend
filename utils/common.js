@@ -4,6 +4,7 @@ const bookHisSearchPage = 12; //사용자별 히스토리에서 읽은 책 리�
 const bookSavedWordSearchPage = 10; //사용자별 히스토리에서 선택한 책의 저장한 단어 리스트 조회
 const bookSavedSentenceSearchPage = 10; //사용자별 히스토리에서 선택한 책의 저장한 문장 리스트 조회
 const communitySearchPage = 10; //등록한 커뮤니티 글 리스트 조회
+const commentSearchPage = 10; //댓글 리스트 조회
 const dictionarySearchPage = 20;
 const commentPage = 5;
 const replyPage = 5;
@@ -151,6 +152,14 @@ const codes = [
     {code:"3231", msg:"커뮤니티글 좋아요 (사용자별) 업데이트 실패", yn:"y"},
     {code:"3232", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3240", msg:"커뮤니티글 좋아요 (사용자별) 업데이트 성공", yn:"y"},
+    {code:"3241", msg:"커뮤니티글 좋아요 (사용자별) 업데이트 실패", yn:"y"},
+    {code:"3242", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3250", msg:"댓글 리스트 조회 성공", yn:"y"},
+    {code:"3251", msg:"댓글 리스트 조회 실패", yn:"y"},
+    {code:"3252", msg:"Internal Server Error", yn:"y"},
+
 
     //9000번대를 관리자페이지 관련 결과코드
     {code:"9000", msg:"코드 조회 성공.", yn:"y"},
@@ -274,6 +283,7 @@ module.exports.commentPage = commentPage;
 module.exports.replyPage = replyPage;
 module.exports.bookHisSearchPage = bookHisSearchPage;
 module.exports.communitySearchPage = communitySearchPage;
+module.exports.commentSearchPage = commentSearchPage;
 
 module.exports.bookSavedWordSearchPage = bookSavedWordSearchPage;
 module.exports.bookSavedSentenceSearchPage = bookSavedSentenceSearchPage;

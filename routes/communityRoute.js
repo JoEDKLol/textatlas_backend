@@ -20,6 +20,7 @@ const sequence = require("../utils/sequences");
 const Communities = require('../models/communitySchemas');
 const Hashtags = require('../models/hashtagSchemas'); 
 const CommunityLikes = require('../models/communityLikeSchemas');
+const Comments = require('../models/commentSchemas');
 
 //파일 업로드
 const s3Uploader = require('../utils/s3Upload');
@@ -220,8 +221,6 @@ communityRoute.post("/communitylistsearch", getFields.none(), async (request, re
     if(lastSeq > 0){
       searchCondition.community_seq = {...searchCondition.community_seq, "$lt":lastSeq}
     }
-
-    console.log(searchCondition);
     
     const resObj = await Communities.find(
       searchCondition
@@ -253,7 +252,7 @@ communityRoute.get("/taglistsearch", getFields.none(), async (request, response)
     
     // 2. 한 달 전 날짜 계산
     const oneMonthAgo = new Date(now); // 현재 시간을 복사
-    oneMonthAgo.setMonth(now.getMonth() - 1); // 현재 달에서 1개월을 웁니다.
+    oneMonthAgo.setMonth(now.getMonth() - 1); // 현재 달에서 1개월을 뺌
     
     const resObj = await Tags.find(
       {regdt: { $gte: oneMonthAgo }}
@@ -307,9 +306,6 @@ communityRoute.get("/communitylikebyuser", getFields.none(), async (request, res
     let sendObj = {};
     const community_seq = parseInt(request.query.community_seq);
     const userseq = parseInt(request.query.userseq);
-    ;
-
-    
 
     const resObj = await CommunityLikes.findOne(
       {
@@ -369,7 +365,7 @@ communityRoute.post("/communitylikeupdate", getFields.none(), async (request, re
       }
 
       const newCommunityLikes =new CommunityLikes(communityLikeObj);
-      let resCommunities=await newCommunityLikes.save();
+      let resCommunityLikes=await newCommunityLikes.save();
     }
 
     let likecntPM;
@@ -405,6 +401,103 @@ communityRoute.post("/communitylikeupdate", getFields.none(), async (request, re
       await session.abortTransaction();
     }
     response.status(500).send(commonModules.sendObjSet("3232", error));
+  }
+});
+
+//커뮤니티 글에 대한 댓글 저장하기
+communityRoute.post("/commentsave", getFields.none(), async (request, response) => {
+  try {
+    let sendObj = {};
+    const session = await mongoose.startSession();
+    session.startTransaction(); // 트랜잭션을 시작합니다.
+
+    const community_seq = parseInt(request.body.community_seq);
+    const userseq = parseInt(request.body.userseq);
+    const email = request.body.email;
+    const userinfo = new ObjectId(request.body.userinfo); //사용자ID
+    const communityinfo = new ObjectId(request.body.communityinfo); //커뮤니티글ID
+    const comment = request.body.comment;
+    
+
+    const comment_seq = await sequence.getSequence("comment_seq");
+    const commentObj = {
+      comment_seq:comment_seq,
+      community_seq:community_seq,
+      userseq:userseq,
+      subcommentyn:false,
+      userinfo:userinfo,
+      communityinfo:communityinfo,
+      comment:comment,
+      reguser:email,
+      upduser:email,
+
+    }
+
+    const newComments = new Comments(commentObj);
+    const resComments = await newComments.save();
+
+    let upRes = await Communities.findOneAndUpdate({community_seq:community_seq}
+      ,{ $inc: { commentcnt: 1 } }
+      ,{ new: true }
+    )
+
+    const obj = {
+      commentcnt:upRes.commentcnt,
+      newCommentObj:resComments
+    }
+    
+    sendObj = commonModules.sendObjSet("3240", obj);
+    response.status(200).send({
+        sendObj
+    });
+
+    await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
+    session.endSession(); // 세션을 종료합니다.
+
+  } catch (error) {
+    if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
+      await session.abortTransaction();
+    }
+
+    response.status(500).send(commonModules.sendObjSet("3242", error));
+  }
+});
+
+//커뮤니티 글에 대한 댓글 조회
+communityRoute.get("/commentsearch", getFields.none(), async (request, response) => {
+  try {
+
+    let sendObj = {};
+
+    const pageListCnt = commonModules.commentSearchPage; //10개씩 조회 
+    const lastCommentSeq = parseInt(request.query.lastCommentSeq); //직전 조회의 마지막 seq
+    const community_seq = parseInt(request.query.community_seq);
+    
+
+    let searchCondition = {};
+    searchCondition.community_seq = community_seq;
+
+    if(lastCommentSeq > 0){
+      searchCondition = {...searchCondition, comment_seq:{$lt:lastCommentSeq}}
+    }
+    
+    const resObj = await Comments.find(
+      searchCondition
+    )
+    .sort({comment_seq:-1, subcomment_seq:-1})
+    .limit(pageListCnt)
+    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    ;
+ 
+    
+    sendObj = commonModules.sendObjSet("3250", resObj);
+    response.status(200).send({
+        sendObj
+    });
+
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3252", error));
   }
 });
 

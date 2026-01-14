@@ -16,12 +16,12 @@ const CommentSchemas = mongoose.Schema({
   
   comment_seq : {
     type: Number,
-    index:{unique:true}
+    index:{unique:false}
   },
 
   subcomment_seq : {
     type: Number,
-    index:{unique:true}
+    index:{unique:false}
   },
 
   community_seq : {
