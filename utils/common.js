@@ -5,6 +5,7 @@ const bookSavedWordSearchPage = 10; //사용자별 히스토리에서 선택한 
 const bookSavedSentenceSearchPage = 10; //사용자별 히스토리에서 선택한 책의 저장한 문장 리스트 조회
 const communitySearchPage = 10; //등록한 커뮤니티 글 리스트 조회
 const commentSearchPage = 10; //댓글 리스트 조회
+const subCommentSearchPage = 10; //대댓글 리스트 조회
 const dictionarySearchPage = 20;
 const commentPage = 5;
 const replyPage = 5;
@@ -160,6 +161,17 @@ const codes = [
     {code:"3251", msg:"댓글 리스트 조회 실패", yn:"y"},
     {code:"3252", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3260", msg:"대댓글 저장 성공", yn:"y"},
+    {code:"3261", msg:"대댓글 저장 실패", yn:"y"},
+    {code:"3262", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3270", msg:"대댓글 조회 성공", yn:"y"},
+    {code:"3271", msg:"대댓글 조회 실패", yn:"y"},
+    {code:"3272", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3280", msg:"나의 정보 업데이트 성공", yn:"y"},
+    {code:"3281", msg:"나의 정보 업데이트 성공 실패", yn:"y"},
+    {code:"3282", msg:"Internal Server Error", yn:"y"},
 
     //9000번대를 관리자페이지 관련 결과코드
     {code:"9000", msg:"코드 조회 성공.", yn:"y"},
@@ -185,6 +197,14 @@ const codes = [
     {code:"9100", msg:"Image save success.", yn:"y"},
     {code:"9101", msg:"Image save failed", yn:"n"},
     {code:"9102", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9110", msg:"Image delete success.", yn:"y"},
+    {code:"9111", msg:"Image delete failed", yn:"n"},
+    {code:"9112", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9120", msg:"Image and userimg delete success.", yn:"y"},
+    {code:"9121", msg:"Image and userimg delete failed", yn:"n"},
+    {code:"9122", msg:"Internal Server Error", yn:"n"},
 
 
 ]
@@ -284,6 +304,7 @@ module.exports.replyPage = replyPage;
 module.exports.bookHisSearchPage = bookHisSearchPage;
 module.exports.communitySearchPage = communitySearchPage;
 module.exports.commentSearchPage = commentSearchPage;
+module.exports.subCommentSearchPage = subCommentSearchPage;
 
 module.exports.bookSavedWordSearchPage = bookSavedWordSearchPage;
 module.exports.bookSavedSentenceSearchPage = bookSavedSentenceSearchPage;

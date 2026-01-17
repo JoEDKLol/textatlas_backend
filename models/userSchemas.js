@@ -82,6 +82,10 @@ const UserSchema = mongoose.Schema({
     default: "kr"
   },
 
+  introduction : {
+    type: String,
+  },
+
   deleteyn : {
     type: String,
     default: "n"

@@ -21,11 +21,15 @@ const Communities = require('../models/communitySchemas');
 const Hashtags = require('../models/hashtagSchemas'); 
 const CommunityLikes = require('../models/communityLikeSchemas');
 const Comments = require('../models/commentSchemas');
+const Users = require('../models/userSchemas');
 
 //파일 업로드
 const s3Uploader = require('../utils/s3Upload');
 const s3Delete = require('../utils/s3Delete');
 const Tags = require('../models/tagSchemas');
+const SubComments = require('../models/subCommentSchemas');
+
+
 
 communityRoute.post('/fileUploadS3',  async (request, response) => {
   try {
@@ -47,8 +51,6 @@ communityRoute.post('/fileUploadS3',  async (request, response) => {
           errMassage : ""
         }
         if (err instanceof multer.MulterError) {  
-
-          
 
             retObj.errMassage = err.message;
             sendObj = commonModules.sendObjSet("9101");
@@ -86,6 +88,85 @@ communityRoute.post('/fileUploadS3',  async (request, response) => {
   }
 });
 
+communityRoute.post("/fileDeleteS3", getFields.none(), async (request, response) => {
+  try {
+      let sendObj = {};
+      
+      let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+      if(!chechAuthRes){
+        sendObj = commonModules.sendObjSet("2011");
+      }else{
+        const imgDeleteRes = await s3Delete(request.body.file_key);
+        
+        if(imgDeleteRes){
+
+          sendObj = commonModules.sendObjSet("9110");
+        }else{
+          sendObj = commonModules.sendObjSet("9111");  
+        }
+        response.send({
+          sendObj
+        }); 
+
+      }
+  } catch (error) {
+    console.log(error);
+    let obj = commonModules.sendObjSet(error.message); //code
+
+    if(obj.code === ""){
+      obj = commonModules.sendObjSet("9112");
+    }
+    response.status(500).send(obj);
+  }
+});
+
+communityRoute.post("/fileDeleteS3withuser", getFields.none(), async (request, response) => {
+  try {
+      let sendObj = {};
+      
+      let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+      if(!chechAuthRes){
+        sendObj = commonModules.sendObjSet("2011");
+      }else{
+        const imgDeleteRes = await s3Delete(request.body.file_key);
+        
+        if(imgDeleteRes){
+          let date = new Date().toISOString();
+
+          let updateUsers=await Users.updateOne(
+            {
+              userseq:request.body.userseq, 
+            },
+            {
+              "userimg":"",
+              "userthumbImg":"",
+              "upduser":request.body.email,
+              "upddate":date,
+            }
+          );
+          sendObj = commonModules.sendObjSet("9120");
+        }else{
+          sendObj = commonModules.sendObjSet("9121");  
+        }
+
+        
+
+        response.send({
+          sendObj
+        }); 
+      }
+
+  } catch (error) {
+    let obj = commonModules.sendObjSet(error.message); //code
+
+    if(obj.code === ""){
+      obj = commonModules.sendObjSet("9122");
+    }
+    response.status(500).send(obj);
+  }
+});
 
 //글쓰기 저장
 communityRoute.post("/savecommunitywriting", getFields.none(), async (request, response) => {
@@ -420,11 +501,11 @@ communityRoute.post("/commentsave", getFields.none(), async (request, response) 
     
 
     const comment_seq = await sequence.getSequence("comment_seq");
+    
     const commentObj = {
       comment_seq:comment_seq,
       community_seq:community_seq,
       userseq:userseq,
-      subcommentyn:false,
       userinfo:userinfo,
       communityinfo:communityinfo,
       comment:comment,
@@ -480,16 +561,21 @@ communityRoute.get("/commentsearch", getFields.none(), async (request, response)
     if(lastCommentSeq > 0){
       searchCondition = {...searchCondition, comment_seq:{$lt:lastCommentSeq}}
     }
+
+    // if(subcomment_seq > 0){
+    //   searchCondition = {...searchCondition, comment_seq:{$lte:lastCommentSeq}, subcomment_seq:{$gt:subcomment_seq} }
+    // }
+    
     
     const resObj = await Comments.find(
       searchCondition
     )
-    .sort({comment_seq:-1, subcomment_seq:-1})
+    .sort({comment_seq:-1, subcomment_seq:1})
     .limit(pageListCnt)
     .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
     ;
  
-    
+
     sendObj = commonModules.sendObjSet("3250", resObj);
     response.status(200).send({
         sendObj
@@ -501,6 +587,109 @@ communityRoute.get("/commentsearch", getFields.none(), async (request, response)
   }
 });
 
+//커뮤니티 글에 대한 댓글 저장하기
+communityRoute.post("/subcommentsave", getFields.none(), async (request, response) => {
+  try {
+    let sendObj = {};
+    const session = await mongoose.startSession();
+    session.startTransaction(); // 트랜잭션을 시작합니다.
+
+    const community_seq = parseInt(request.body.community_seq);
+    const comment_seq = parseInt(request.body.comment_seq);
+    const userseq = parseInt(request.body.userseq);
+    const email = request.body.email;
+    const userinfo = new ObjectId(request.body.userinfo); //사용자ID
+    const communityinfo = new ObjectId(request.body.communityinfo); //커뮤니티글ID
+    const comment = request.body.comment;
+    
+
+    const subcomment_seq = await sequence.getSequence("subcomment_seq");
+    const subCommentObj = {
+      comment_seq:comment_seq,
+      subcomment_seq:subcomment_seq,
+      community_seq:community_seq,
+      userseq:userseq,
+      userinfo:userinfo,
+      communityinfo:communityinfo,
+      comment:comment,
+      reguser:email,
+      upduser:email,
+
+    }
+
+    const newSubComments = new SubComments(subCommentObj);
+    const resSubComments = await newSubComments.save();
+
+    let upRes = await Comments.findOneAndUpdate({community_seq:community_seq, comment_seq:comment_seq,}
+      ,{ $inc: { subcommentcnt: 1 } }
+      ,{ new: true }
+    )
+
+    const obj = {
+      subcommentcnt:upRes.subcommentcnt,
+      newCommentObj:resSubComments
+    }
+    
+    sendObj = commonModules.sendObjSet("3250", obj);
+    response.status(200).send({
+        sendObj
+    });
+
+    await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
+    session.endSession(); // 세션을 종료합니다.
+
+  } catch (error) {
+    if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
+      await session.abortTransaction();
+    }
+
+    response.status(500).send(commonModules.sendObjSet("3252", error));
+  }
+});
+
+//커뮤니티 글에 대한 대댓글 조회
+communityRoute.get("/subcommentsearch", getFields.none(), async (request, response) => {
+  try {
+
+    let sendObj = {};
+
+    const pageListCnt = commonModules.subCommentSearchPage; //10개씩 조회 
+    const lastSubCommentSeq = parseInt(request.query.lastSubCommentSeq); //직전 조회의 마지막 seq
+    const community_seq = parseInt(request.query.community_seq);
+    const comment_seq = parseInt(request.query.comment_seq);
+
+    let searchCondition = {};
+    searchCondition.community_seq = community_seq;
+    searchCondition.comment_seq = comment_seq;
+
+    if(lastSubCommentSeq > 0){
+      searchCondition = {...searchCondition, subcomment_seq:{$lt:lastSubCommentSeq}}
+    }
+
+    // if(subcomment_seq > 0){
+    //   searchCondition = {...searchCondition, comment_seq:{$lte:lastCommentSeq}, subcomment_seq:{$gt:subcomment_seq} }
+    // }
+    
+    
+    const resObj = await SubComments.find(
+      searchCondition
+    )
+    .sort({subcomment_seq:-1})
+    .limit(pageListCnt)
+    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    ;
+ 
+
+    sendObj = commonModules.sendObjSet("3270", resObj);
+    response.status(200).send({
+        sendObj
+    });
+
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3272", error));
+  }
+});
 
 
 module.exports=communityRoute

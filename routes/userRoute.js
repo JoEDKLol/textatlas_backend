@@ -219,6 +219,7 @@ userRoute.get("/getAccessToken", getFields.none(), async (request, response) => 
               firstLogin : userData.firstLogin, 
               socialLogin : userData.socialLogin, 
               preferred_trans_lang : userData.preferred_trans_lang,
+              introduction : userData.introduction,
             }
             sendObj = commonModules.sendObjSet("2000", userObj);
             const accesstoken = jwtModules.retAccessToken(userData._id, userData.email);
@@ -300,6 +301,7 @@ userRoute.post("/signin", getFields.none(), async (request, response) => {
             firstLogin : userData.firstLogin, 
             socialLogin : userData.socialLogin, 
             preferred_trans_lang : userData.preferred_trans_lang,
+            introduction : userData.introduction,
             
           }
 
@@ -382,6 +384,7 @@ userRoute.post("/googlesignin", getFields.none(), async (request, response) => {
           firstLogin : resusers.firstLogin, 
           socialLogin : resusers.socialLogin, 
           preferred_trans_lang : resusers.preferred_trans_lang,
+          introduction : resusers.introduction,
         }
         response.setHeader("refreshtoken", refreshtoken);
         sendObj = commonModules.sendObjSet("1050", resUserObj);
@@ -412,6 +415,7 @@ userRoute.post("/googlesignin", getFields.none(), async (request, response) => {
           firstLogin : userData.firstLogin, 
           socialLogin : userData.socialLogin, 
           preferred_trans_lang : userData.preferred_trans_lang,
+          introduction : userData.introduction,
         }
 
         response.setHeader("refreshtoken", refreshtoken);
@@ -456,6 +460,7 @@ userRoute.post("/checkaccessToken", getFields.none(), async (request, response) 
             firstLogin : userData.firstLogin, 
             socialLogin : userData.socialLogin, 
             preferred_trans_lang : userData.preferred_trans_lang,
+            introduction : userData.introduction,
           }
           sendObj = commonModules.sendObjSet("2010", userObj);
             
@@ -665,6 +670,47 @@ userRoute.post("/usertranslatorupdate", getFields.none(), async (request, respon
 });
 
 
+userRoute.post("/userupdate", getFields.none(), async (request, response) => {
+  try {
+      let sendObj = {};
+      
+      let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+      if(!chechAuthRes){
+        sendObj = commonModules.sendObjSet("2011");
+      }else{
+        let date = new Date().toISOString();
+
+        let updateUsers=await Users.updateOne(
+          {
+            userseq:request.body.userseq, 
+          },
+          {
+            "userimg":request.body.userimg,
+            "userthumbImg":request.body.userthumbImg,
+            "username":request.body.username,
+            "introduction":request.body.introduction,
+            "upduser":request.body.email,
+            "upddate":date,
+          }
+        );
+        sendObj = commonModules.sendObjSet("3280");
+
+        response.send({
+          sendObj
+        }); 
+      }
+
+  } catch (error) {
+    console.log(error);
+    let obj = commonModules.sendObjSet(error.message); //code
+
+    if(obj.code === ""){
+      obj = commonModules.sendObjSet("3282");
+    }
+    response.status(500).send(obj);
+  }
+});
 
 
 

@@ -12,9 +12,14 @@ const getDateString = () => {
   return `${yyyy}${mm}${dd}${hours}${minutes}${seconds}`; // e.g., "20250430000000"
 };
 
-const CommentSchemas = mongoose.Schema({
+const SubCommentSchemas = mongoose.Schema({
     
   comment_seq : {
+    type: Number,
+    index:{unique:false}
+  },
+
+  subcomment_seq : {
     type: Number,
     index:{unique:true}
   },
@@ -44,16 +49,6 @@ const CommentSchemas = mongoose.Schema({
   comment : { 
     type: String,
   },
-
-  likecnt : {
-    type:Number,
-    default: 0
-  },
-
-  subcommentcnt : {
-    type:Number,
-    default: 0
-  },
   
   deleteyn : {
     type: String,
@@ -81,5 +76,5 @@ const CommentSchemas = mongoose.Schema({
 
 
 
-const Comments=mongoose.model('comment',CommentSchemas)
-module.exports=Comments
+const SubComments=mongoose.model('subcomment',SubCommentSchemas)
+module.exports=SubComments
