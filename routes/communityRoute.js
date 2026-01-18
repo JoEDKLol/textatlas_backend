@@ -256,6 +256,102 @@ communityRoute.post("/savecommunitywriting", getFields.none(), async (request, r
   }
 });
 
+//커뮤니티글 업데이트
+communityRoute.post("/updatecommunitywriting", getFields.none(), async (request, response) => {
+  try {
+    
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+    
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+      // Communities //
+      const session = await mongoose.startSession();
+      const userseq = parseInt(request.body.userseq);
+      const title = request.body.title;
+      const contents = request.body.contents;
+      const hashtags = request.body.hashtags;
+
+      const community_seq = parseInt(request.body.community_seq);
+      session.startTransaction(); // 트랜잭션을 시작합니다.
+
+
+      let date = new Date().toISOString();
+      const resCommunities = await Communities.updateOne(
+        {
+          community_seq:community_seq,
+          userseq:userseq,
+        },
+        {
+          "title":title,
+          "contents":contents,
+          "hashtags":hashtags,
+          "upduser":request.body.email,
+          "upddate":date,
+        }
+    
+      );
+
+      //기존 tag 삭제
+      await Hashtags.deleteMany({community_seq:community_seq,});
+      // community_seq
+      //hashtag 저장
+      if(hashtags.length > 0){
+
+        let hashtagObjArr = new Array();
+
+        for(let i=0; i<hashtags.length; i++){
+          const tagName = hashtags[i];
+          const obj = {
+            tagname:hashtags[i],
+            community_seq:community_seq,
+            reguser:request.body.email,
+            upduser:request.body.email,
+          }
+
+          hashtagObjArr.push(obj);
+          //동일한 tag가 있는 경우 건수를 증가시킨다.
+          const resTags = await Tags.findOneAndUpdate(
+            { tagname: tagName }, // 찾을 조건 (Query)
+            {
+              "$inc": {"cnt": 1}, 
+            },  // 업데이트할 내용 ($set 연산자 사용 권장)
+            { upsert: true } // 옵션: 새 문서 반환, upsert 활성화
+          );
+
+        }
+        const resHashTags = await Hashtags.insertMany(hashtagObjArr);
+      } 
+
+      const resObj = await Communities.findOne(
+        {community_seq:community_seq,}
+      )
+      .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+      ;
+      
+      sendObj = commonModules.sendObjSet("3320", resObj);
+      ;
+
+
+      await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
+      session.endSession(); // 세션을 종료합니다.
+      
+    }
+
+    response.status(200).send({
+      sendObj
+    });
+  } catch (error) {
+    console.log(error);
+    if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
+      await session.abortTransaction();
+    }
+    response.status(500).send(commonModules.sendObjSet("3322", error));
+  }
+});
+
 //커뮤니티 글 리스트 조회
 communityRoute.post("/communitylistsearch", getFields.none(), async (request, response) => {
   try {
@@ -380,6 +476,33 @@ communityRoute.get("/communitydetailsearch", getFields.none(), async (request, r
   }
 });
 
+//커뮤니티 사용자 글 리스트 상세조회 
+communityRoute.get("/communitydetailusersearch", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+    const community_seq = parseInt(request.query.community_seq);
+    const userseq = parseInt(request.query.userseq);
+    const resObj = await Communities.findOne(
+      {community_seq:community_seq, userseq:userseq}
+    )
+    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    ;
+
+    sendObj = commonModules.sendObjSet("3310", resObj);
+
+    response.status(200).send({
+        sendObj
+    });
+
+    //좋아요 클릭 조회
+
+  } catch (error) {
+    // console.log(error);
+    response.status(500).send(commonModules.sendObjSet("3312", error));
+  }
+});
+
 //커뮤니티 글 좋아요 조회 사용자별
 communityRoute.get("/communitylikebyuser", getFields.none(), async (request, response) => {
   try {
@@ -413,69 +536,72 @@ communityRoute.post("/communitylikeupdate", getFields.none(), async (request, re
   try {
       
     let sendObj = {};
-    const session = await mongoose.startSession();
-    const community_seq = parseInt(request.body.community_seq);
-    const userseq = parseInt(request.body.userseq);
-    const email = request.body.email;
-    const likeyn = request.body.likeyn;
     
-    const resObj = await CommunityLikes.findOne(
-      {
-        community_seq:community_seq,
-        userseq:userseq
-      }
-    )
-
-    session.startTransaction(); // 트랜잭션을 시작합니다.
-
-    if(resObj){ //업데이트
-      let upRes = await CommunityLikes.updateOne({
-        community_seq:community_seq,
-        userseq:userseq
-      },
-      {  likeyn: likeyn })
-    }else{ //insert
-      const communityLikeObj = {
-        community_seq:community_seq,
-        userseq:userseq,
-        communityinfo:new ObjectId(request.body.community_id),
-        likeyn:true,
-        reguser:request.body.email,
-        upduser:request.body.email,
-
-      }
-
-      const newCommunityLikes =new CommunityLikes(communityLikeObj);
-      let resCommunityLikes=await newCommunityLikes.save();
-    }
-
-    let likecntPM;
-    if(likeyn){
-      likecntPM = 1;
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+    
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
     }else{
-      likecntPM = -1
-    }
-    let upRes = await Communities.findOneAndUpdate({community_seq:community_seq}
-      ,{ $inc: { likecnt: likecntPM } }
-      ,{ new: true }
-    )
-
-
-    const obj = {
-      likeyn:likeyn,
-      likecnt:upRes.likecnt
-    }
-
-    sendObj = commonModules.sendObjSet("3230", obj);
-
     
+      const session = await mongoose.startSession();
+      const community_seq = parseInt(request.body.community_seq);
+      const userseq = parseInt(request.body.userseq);
+      const email = request.body.email;
+      const likeyn = request.body.likeyn;
+      
+      const resObj = await CommunityLikes.findOne(
+        {
+          community_seq:community_seq,
+          userseq:userseq
+        }
+      )
 
-    response.status(200).send({
-        sendObj
-    });
+      session.startTransaction(); // 트랜잭션을 시작합니다.
 
-    await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
-    session.endSession(); // 세션을 종료합니다.
+      if(resObj){ //업데이트
+        let upRes = await CommunityLikes.updateOne({
+          community_seq:community_seq,
+          userseq:userseq
+        },
+        {  likeyn: likeyn })
+      }else{ //insert
+        const communityLikeObj = {
+          community_seq:community_seq,
+          userseq:userseq,
+          communityinfo:new ObjectId(request.body.community_id),
+          likeyn:true,
+          reguser:request.body.email,
+          upduser:request.body.email,
+
+        }
+
+        const newCommunityLikes =new CommunityLikes(communityLikeObj);
+        let resCommunityLikes=await newCommunityLikes.save();
+      }
+
+      let likecntPM;
+      if(likeyn){
+        likecntPM = 1;
+      }else{
+        likecntPM = -1
+      }
+      let upRes = await Communities.findOneAndUpdate({community_seq:community_seq}
+        ,{ $inc: { likecnt: likecntPM } }
+        ,{ new: true }
+      )
+
+
+      const obj = {
+        likeyn:likeyn,
+        likecnt:upRes.likecnt
+      }
+
+      sendObj = commonModules.sendObjSet("3230", obj);
+      await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
+      session.endSession(); // 세션을 종료합니다.
+    }
+
+    response.status(200).send({sendObj});
 
   } catch (error) {
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
@@ -489,53 +615,63 @@ communityRoute.post("/communitylikeupdate", getFields.none(), async (request, re
 communityRoute.post("/commentsave", getFields.none(), async (request, response) => {
   try {
     let sendObj = {};
-    const session = await mongoose.startSession();
-    session.startTransaction(); // 트랜잭션을 시작합니다.
 
-    const community_seq = parseInt(request.body.community_seq);
-    const userseq = parseInt(request.body.userseq);
-    const email = request.body.email;
-    const userinfo = new ObjectId(request.body.userinfo); //사용자ID
-    const communityinfo = new ObjectId(request.body.communityinfo); //커뮤니티글ID
-    const comment = request.body.comment;
-    
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
 
-    const comment_seq = await sequence.getSequence("comment_seq");
-    
-    const commentObj = {
-      comment_seq:comment_seq,
-      community_seq:community_seq,
-      userseq:userseq,
-      userinfo:userinfo,
-      communityinfo:communityinfo,
-      comment:comment,
-      reguser:email,
-      upduser:email,
+      const session = await mongoose.startSession();
+      session.startTransaction(); // 트랜잭션을 시작합니다.
 
+      const community_seq = parseInt(request.body.community_seq);
+      const userseq = parseInt(request.body.userseq);
+      const email = request.body.email;
+      const userinfo = new ObjectId(request.body.userinfo); //사용자ID
+      const communityinfo = new ObjectId(request.body.communityinfo); //커뮤니티글ID
+      const comment = request.body.comment;
+      
+
+      const comment_seq = await sequence.getSequence("comment_seq");
+      
+      const commentObj = {
+        comment_seq:comment_seq,
+        community_seq:community_seq,
+        userseq:userseq,
+        userinfo:userinfo,
+        communityinfo:communityinfo,
+        comment:comment,
+        reguser:email,
+        upduser:email,
+
+      }
+
+      const newComments = new Comments(commentObj);
+      const resComments = await newComments.save();
+
+      let upRes = await Communities.findOneAndUpdate({community_seq:community_seq}
+        ,{ $inc: { commentcnt: 1 } }
+        ,{ new: true }
+      )
+
+
+
+      const obj = {
+        commentcnt:upRes.commentcnt,
+        newCommentObj:resComments
+      }
+      
+      sendObj = commonModules.sendObjSet("3240", obj);
+      
+
+      await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
+      session.endSession(); // 세션을 종료합니다.
     }
 
-    const newComments = new Comments(commentObj);
-    const resComments = await newComments.save();
-
-    let upRes = await Communities.findOneAndUpdate({community_seq:community_seq}
-      ,{ $inc: { commentcnt: 1 } }
-      ,{ new: true }
-    )
-
-    const obj = {
-      commentcnt:upRes.commentcnt,
-      newCommentObj:resComments
-    }
-    
-    sendObj = commonModules.sendObjSet("3240", obj);
-    response.status(200).send({
-        sendObj
-    });
-
-    await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
-    session.endSession(); // 세션을 종료합니다.
+    response.status(200).send({sendObj});
 
   } catch (error) {
+    // console.log(error);
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
@@ -591,52 +727,57 @@ communityRoute.get("/commentsearch", getFields.none(), async (request, response)
 communityRoute.post("/subcommentsave", getFields.none(), async (request, response) => {
   try {
     let sendObj = {};
-    const session = await mongoose.startSession();
-    session.startTransaction(); // 트랜잭션을 시작합니다.
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
 
-    const community_seq = parseInt(request.body.community_seq);
-    const comment_seq = parseInt(request.body.comment_seq);
-    const userseq = parseInt(request.body.userseq);
-    const email = request.body.email;
-    const userinfo = new ObjectId(request.body.userinfo); //사용자ID
-    const communityinfo = new ObjectId(request.body.communityinfo); //커뮤니티글ID
-    const comment = request.body.comment;
-    
+      const session = await mongoose.startSession();
+      session.startTransaction(); // 트랜잭션을 시작합니다.
 
-    const subcomment_seq = await sequence.getSequence("subcomment_seq");
-    const subCommentObj = {
-      comment_seq:comment_seq,
-      subcomment_seq:subcomment_seq,
-      community_seq:community_seq,
-      userseq:userseq,
-      userinfo:userinfo,
-      communityinfo:communityinfo,
-      comment:comment,
-      reguser:email,
-      upduser:email,
+      const community_seq = parseInt(request.body.community_seq);
+      const comment_seq = parseInt(request.body.comment_seq);
+      const userseq = parseInt(request.body.userseq);
+      const email = request.body.email;
+      const userinfo = new ObjectId(request.body.userinfo); //사용자ID
+      const communityinfo = new ObjectId(request.body.communityinfo); //커뮤니티글ID
+      const comment = request.body.comment;
+      
 
+      const subcomment_seq = await sequence.getSequence("subcomment_seq");
+      const subCommentObj = {
+        comment_seq:comment_seq,
+        subcomment_seq:subcomment_seq,
+        community_seq:community_seq,
+        userseq:userseq,
+        userinfo:userinfo,
+        communityinfo:communityinfo,
+        comment:comment,
+        reguser:email,
+        upduser:email,
+
+      }
+
+      const newSubComments = new SubComments(subCommentObj);
+      const resSubComments = await newSubComments.save();
+
+      let upRes = await Comments.findOneAndUpdate({community_seq:community_seq, comment_seq:comment_seq,}
+        ,{ $inc: { subcommentcnt: 1 } }
+        ,{ new: true }
+      )
+
+      const obj = {
+        subcommentcnt:upRes.subcommentcnt,
+        newCommentObj:resSubComments
+      }
+      
+      sendObj = commonModules.sendObjSet("3250", obj);
+
+      await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
+      session.endSession(); // 세션을 종료합니다.
     }
 
-    const newSubComments = new SubComments(subCommentObj);
-    const resSubComments = await newSubComments.save();
-
-    let upRes = await Comments.findOneAndUpdate({community_seq:community_seq, comment_seq:comment_seq,}
-      ,{ $inc: { subcommentcnt: 1 } }
-      ,{ new: true }
-    )
-
-    const obj = {
-      subcommentcnt:upRes.subcommentcnt,
-      newCommentObj:resSubComments
-    }
-    
-    sendObj = commonModules.sendObjSet("3250", obj);
-    response.status(200).send({
-        sendObj
-    });
-
-    await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
-    session.endSession(); // 세션을 종료합니다.
+    response.status(200).send({sendObj});
 
   } catch (error) {
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
@@ -691,5 +832,87 @@ communityRoute.get("/subcommentsearch", getFields.none(), async (request, respon
   }
 });
 
+//댓글업데이트
+communityRoute.post("/commentupdate", getFields.none(), async (request, response) => {
+  try {
+      let sendObj = {};
+      let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+      if(!chechAuthRes){
+        sendObj = commonModules.sendObjSet("2011");
+      }else{
+        let date = new Date().toISOString();
+
+        let updateComments=await Comments.updateOne(
+          {
+            community_seq:request.body.community_seq,
+            comment_seq:request.body.comment_seq,
+          },
+          {
+            
+            "comment":request.body.comment,
+            "upduser":request.body.email,
+            "upddate":date,
+          }
+        );
+        sendObj = commonModules.sendObjSet("3290");
+
+        response.send({
+          sendObj
+        }); 
+      }
+
+  } catch (error) {
+    // console.log(error);
+    let obj = commonModules.sendObjSet(error.message); //code
+
+    if(obj.code === ""){
+      obj = commonModules.sendObjSet("3292");
+    }
+    response.status(500).send(obj);
+  }
+});
+
+//대댓글업데이트
+communityRoute.post("/subcommentupdate", getFields.none(), async (request, response) => {
+  try {
+      let sendObj = {};
+      let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+      if(!chechAuthRes){
+        sendObj = commonModules.sendObjSet("2011");
+      }else{
+        let date = new Date().toISOString();
+
+        let updateComments=await SubComments.updateOne(
+          {
+            subcomment_seq:request.body.subcomment_seq,
+            community_seq:request.body.community_seq,
+            comment_seq:request.body.comment_seq,
+
+          },
+          {
+            "comment":request.body.comment,
+            "upduser":request.body.email,
+            "upddate":date,
+          }
+        );
+        sendObj = commonModules.sendObjSet("3300");
+
+        response.send({
+          sendObj
+        }); 
+      }
+
+  } catch (error) {
+    // console.log(error);
+    let obj = commonModules.sendObjSet(error.message); //code
+
+    if(obj.code === ""){
+      obj = commonModules.sendObjSet("3302");
+    }
+    response.status(500).send(obj);
+  }
+});
 
 module.exports=communityRoute

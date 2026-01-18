@@ -170,8 +170,24 @@ const codes = [
     {code:"3272", msg:"Internal Server Error", yn:"y"},
 
     {code:"3280", msg:"나의 정보 업데이트 성공", yn:"y"},
-    {code:"3281", msg:"나의 정보 업데이트 성공 실패", yn:"y"},
+    {code:"3281", msg:"나의 정보 업데이트 실패", yn:"y"},
     {code:"3282", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3290", msg:"댓글 업데이트 성공", yn:"y"},
+    {code:"3291", msg:"댓글 업데이트 실패", yn:"y"},
+    {code:"3292", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3300", msg:"댓글 업데이트 성공", yn:"y"},
+    {code:"3301", msg:"댓글 업데이트 실패", yn:"y"},
+    {code:"3302", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3310", msg:"댓글 업데이트 성공", yn:"y"},
+    {code:"3311", msg:"댓글 업데이트 실패", yn:"y"},
+    {code:"3312", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3320", msg:"커뮤니티 글 업데이트 성공", yn:"y"},
+    {code:"3321", msg:"커뮤니티 글 업데이트 실패", yn:"y"},
+    {code:"3322", msg:"Internal Server Error", yn:"y"},
 
     //9000번대를 관리자페이지 관련 결과코드
     {code:"9000", msg:"코드 조회 성공.", yn:"y"},
