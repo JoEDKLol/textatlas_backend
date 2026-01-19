@@ -232,12 +232,15 @@ communityRoute.post("/savecommunitywriting", getFields.none(), async (request, r
 
         }
         const resHashTags = await Hashtags.insertMany(hashtagObjArr);
+      }
 
-        
+      const resObj = await Communities.findOne(
+        {community_seq:community_seq,}
+      )
+      .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
+      ;
 
-      } 
-
-      sendObj = commonModules.sendObjSet("3180");
+      sendObj = commonModules.sendObjSet("3180", resObj);
       ;
 
       await session.commitTransaction(); // 모든 작업이 성공했으므로 커밋합니다.
@@ -328,7 +331,7 @@ communityRoute.post("/updatecommunitywriting", getFields.none(), async (request,
       const resObj = await Communities.findOne(
         {community_seq:community_seq,}
       )
-      .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+      .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
       ;
       
       sendObj = commonModules.sendObjSet("3320", resObj);
@@ -404,7 +407,7 @@ communityRoute.post("/communitylistsearch", getFields.none(), async (request, re
     )
     .sort({community_seq:-1})
     .limit(pageListCnt)
-    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
     ;
 
     sendObj = commonModules.sendObjSet("3190", resObj);
@@ -459,7 +462,7 @@ communityRoute.get("/communitydetailsearch", getFields.none(), async (request, r
     const resObj = await Communities.findOne(
       {community_seq:community_seq}
     )
-    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
     ;
 
     sendObj = commonModules.sendObjSet("3210", resObj);
@@ -486,7 +489,7 @@ communityRoute.get("/communitydetailusersearch", getFields.none(), async (reques
     const resObj = await Communities.findOne(
       {community_seq:community_seq, userseq:userseq}
     )
-    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
     ;
 
     sendObj = commonModules.sendObjSet("3310", resObj);
@@ -708,7 +711,7 @@ communityRoute.get("/commentsearch", getFields.none(), async (request, response)
     )
     .sort({comment_seq:-1, subcomment_seq:1})
     .limit(pageListCnt)
-    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
     ;
  
 
@@ -817,7 +820,7 @@ communityRoute.get("/subcommentsearch", getFields.none(), async (request, respon
     )
     .sort({subcomment_seq:-1})
     .limit(pageListCnt)
-    .populate('userinfo', {_id:0, userseq:1, email:1, username:1, userimg:1, userthumbImg:1}).exec()
+    .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
     ;
  
 

@@ -54,6 +54,39 @@ const codes = [
     {code:"1041", msg:"비밀번호 변경 실패.", yn:"n"},
     {code:"1042", msg:"Internal Server Error", yn:"n"},
 
+    //9000번대를 관리자페이지 관련 결과코드
+    {code:"9000", msg:"코드 조회 성공.", yn:"y"},
+    {code:"9001", msg:"코드 조회 실패", yn:"n"},
+    {code:"9002", msg:"Internal Server Error", yn:"n"},
+    {code:"9010", msg:"languageSet 조회 성공.", yn:"y"},
+    {code:"9011", msg:"languageSet 조회 실패", yn:"n"},
+    {code:"9012", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9030", msg:"wordlist 조회 성공.", yn:"y"},
+    {code:"9031", msg:"wordlist 조회 실패", yn:"n"},
+    {code:"9032", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9040", msg:"wordlist update 성공.", yn:"y"},
+    {code:"9041", msg:"wordlist update 실패", yn:"n"},
+    {code:"9042", msg:"Internal Server Error", yn:"n"},
+    {code:"9043", msg:"이미 저장된 단어입니다.", yn:"n"},
+
+    {code:"9050", msg:"wordlist 다건 save 성공.", yn:"y"},
+    {code:"9051", msg:"wordlist 다건 save 실패", yn:"n"},
+    {code:"9052", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9100", msg:"Image save success.", yn:"y"},
+    {code:"9101", msg:"Image save failed", yn:"n"},
+    {code:"9102", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9110", msg:"Image delete success.", yn:"y"},
+    {code:"9111", msg:"Image delete failed", yn:"n"},
+    {code:"9112", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9120", msg:"Image and userimg delete success.", yn:"y"},
+    {code:"9121", msg:"Image and userimg delete failed", yn:"n"},
+    {code:"9122", msg:"Internal Server Error", yn:"n"},
+
 
     {code:"3000", msg:"books 조회 성공", yn:"y"},
     {code:"3001", msg:"books 조회 실패", yn:"y"},
@@ -189,38 +222,15 @@ const codes = [
     {code:"3321", msg:"커뮤니티 글 업데이트 실패", yn:"y"},
     {code:"3322", msg:"Internal Server Error", yn:"y"},
 
-    //9000번대를 관리자페이지 관련 결과코드
-    {code:"9000", msg:"코드 조회 성공.", yn:"y"},
-    {code:"9001", msg:"코드 조회 실패", yn:"n"},
-    {code:"9002", msg:"Internal Server Error", yn:"n"},
-    {code:"9010", msg:"languageSet 조회 성공.", yn:"y"},
-    {code:"9011", msg:"languageSet 조회 실패", yn:"n"},
-    {code:"9012", msg:"Internal Server Error", yn:"n"},
+    {code:"3330", msg:"쪽지함 조회 성공", yn:"y"},
+    {code:"3331", msg:"쪽지함 조회 실패", yn:"y"},
+    {code:"3332", msg:"Internal Server Error", yn:"y"},
 
-    {code:"9030", msg:"wordlist 조회 성공.", yn:"y"},
-    {code:"9031", msg:"wordlist 조회 실패", yn:"n"},
-    {code:"9032", msg:"Internal Server Error", yn:"n"},
+    {code:"3340", msg:"쪽지함 전송 성공", yn:"y"},
+    {code:"3341", msg:"쪽지함 전송 실패", yn:"y"},
+    {code:"3342", msg:"Internal Server Error", yn:"y"},
 
-    {code:"9040", msg:"wordlist update 성공.", yn:"y"},
-    {code:"9041", msg:"wordlist update 실패", yn:"n"},
-    {code:"9042", msg:"Internal Server Error", yn:"n"},
-    {code:"9043", msg:"이미 저장된 단어입니다.", yn:"n"},
-
-    {code:"9050", msg:"wordlist 다건 save 성공.", yn:"y"},
-    {code:"9051", msg:"wordlist 다건 save 실패", yn:"n"},
-    {code:"9052", msg:"Internal Server Error", yn:"n"},
-
-    {code:"9100", msg:"Image save success.", yn:"y"},
-    {code:"9101", msg:"Image save failed", yn:"n"},
-    {code:"9102", msg:"Internal Server Error", yn:"n"},
-
-    {code:"9110", msg:"Image delete success.", yn:"y"},
-    {code:"9111", msg:"Image delete failed", yn:"n"},
-    {code:"9112", msg:"Internal Server Error", yn:"n"},
-
-    {code:"9120", msg:"Image and userimg delete success.", yn:"y"},
-    {code:"9121", msg:"Image and userimg delete failed", yn:"n"},
-    {code:"9122", msg:"Internal Server Error", yn:"n"},
+    
 
 
 ]

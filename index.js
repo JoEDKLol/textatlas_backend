@@ -23,6 +23,7 @@ const readingRoute = require('./routes/reading');
 const historyRoute = require('./routes/historyRoute');
 const administratorRouter = require('./routes/administratorRoute');
 const communityRoute = require('./routes/communityRoute');
+const messageRoute = require('./routes/messageRoute');
 const publicPath = path.join(__dirname, "uploads"); //정적파일 로드 
 
 
@@ -63,6 +64,8 @@ app.use('/reading',readingRoute);
 app.use('/administrator',administratorRouter);
 app.use('/history',historyRoute);
 app.use('/community',communityRoute);
+app.use('/message',messageRoute);
+
 
 
 // app.use('/res',restaurantRoute);
