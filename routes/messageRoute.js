@@ -23,8 +23,16 @@ messageRoute.get("/messagelistsearch", getFields.none(), async (request, respons
     if(!chechAuthRes){
       sendObj = commonModules.sendObjSet("2011");
     }else{
+      const userseq = parseInt(request.query.userseq);
 
-      const resObj = await Messages.find({});
+      const resObj = await Messages.find({
+        $or: [ { send_user_seq:userseq }, { receive_user_seq:userseq } ]
+      })
+      .sort({message_seq:-1})
+      ;
+
+      console.log(resObj);
+
       sendObj = commonModules.sendObjSet("3330", resObj);
     }
 
