@@ -23,15 +23,20 @@ messageRoute.get("/messagelistsearch", getFields.none(), async (request, respons
     if(!chechAuthRes){
       sendObj = commonModules.sendObjSet("2011");
     }else{
+
+      const pageListCnt = commonModules.messageSearchPage; //10개씩 조회 
+
       const userseq = parseInt(request.query.userseq);
 
       const resObj = await Messages.find({
         $or: [ { send_user_seq:userseq }, { receive_user_seq:userseq } ]
       })
       .sort({message_seq:-1})
+      .limit(pageListCnt)
+      .populate('send_userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1})
+      .populate('receive_userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1})
+      .exec()
       ;
-
-      console.log(resObj);
 
       sendObj = commonModules.sendObjSet("3330", resObj);
     }
@@ -94,8 +99,52 @@ messageRoute.post("/messagesend", getFields.none(), async (request, response) =>
     });
 
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     response.status(500).send(commonModules.sendObjSet("3342", error));
+      
+  }
+});
+
+//내용확인 업데이트
+messageRoute.post("/receivemessagecheck", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken); //로그인이 필요함.
+        
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+
+
+      const date = new Date().toISOString();
+
+      const updateMessages=await Messages.findOneAndUpdate(
+        {
+          message_seq:request.body.message_seq,
+        },
+        {
+          
+          "receive_time":commonModules.getDateStringYYYYMMDDhhmmss(),
+          "msg_checkyn":true,
+          "upduser":request.body.email,
+          "upddate":date,
+        },
+        { new: true } // 옵션: 새 문서 반환
+
+      );
+      
+      sendObj = commonModules.sendObjSet("3350", updateMessages);
+    }
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    // console.log(error);
+    response.status(500).send(commonModules.sendObjSet("3352", error));
       
   }
 });

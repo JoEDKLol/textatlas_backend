@@ -5,7 +5,8 @@ const bookSavedWordSearchPage = 10; //사용자별 히스토리에서 선택한 
 const bookSavedSentenceSearchPage = 10; //사용자별 히스토리에서 선택한 책의 저장한 문장 리스트 조회
 const communitySearchPage = 10; //등록한 커뮤니티 글 리스트 조회
 const commentSearchPage = 10; //댓글 리스트 조회
-const subCommentSearchPage = 10; //대댓글 리스트 조회
+const subCommentSearchPage = 10; //대댓글 리스트 조회 거수
+const messageSearchPage = 10; //메시지 리스트 조회 건수
 const dictionarySearchPage = 20;
 const commentPage = 5;
 const replyPage = 5;
@@ -230,6 +231,10 @@ const codes = [
     {code:"3341", msg:"쪽지함 전송 실패", yn:"y"},
     {code:"3342", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3350", msg:"쪽지함 내용 확인 업데이트 성공", yn:"y"},
+    {code:"3351", msg:"쪽지함 내용 확인 업데이트 실패", yn:"y"},
+    {code:"3352", msg:"Internal Server Error", yn:"y"},
+
     
 
 
@@ -285,6 +290,18 @@ const getDateString = () => {
   return `${yyyy}${mm}${dd}`; // e.g., "20250430"
 };
 
+const getDateStringYYYYMMDDhhmmss = () => {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0'); // 0부터 시작하므로 +1
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  return `${yyyy}${mm}${dd}${hours}${minutes}${seconds}`; // e.g., "20250430000000"
+};
+
 /**
  * 주어진 문자열 배열에서 문장 내의 엔터값을 공백으로 변환합니다.
  * 순수하게 공백/엔터로만 이루어진 문자열은 변경하지 않고 유지합니다.
@@ -331,9 +348,10 @@ module.exports.bookHisSearchPage = bookHisSearchPage;
 module.exports.communitySearchPage = communitySearchPage;
 module.exports.commentSearchPage = commentSearchPage;
 module.exports.subCommentSearchPage = subCommentSearchPage;
+module.exports.messageSearchPage = messageSearchPage;
 
 module.exports.bookSavedWordSearchPage = bookSavedWordSearchPage;
 module.exports.bookSavedSentenceSearchPage = bookSavedSentenceSearchPage;
 
 module.exports.processTextArray = processTextArray;
-
+module.exports.getDateStringYYYYMMDDhhmmss = getDateStringYYYYMMDDhhmmss

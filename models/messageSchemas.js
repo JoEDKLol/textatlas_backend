@@ -33,7 +33,7 @@ const MessageSchemas = mongoose.Schema({
     default: getDateString,
   },
 
-  receive_time : {
+  receive_time : { //확인 시간
     type: String,
   },
 
