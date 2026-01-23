@@ -235,7 +235,22 @@ const codes = [
     {code:"3351", msg:"쪽지함 내용 확인 업데이트 실패", yn:"y"},
     {code:"3352", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3360", msg:"읽지 않은 메시지 건수 조회 성공", yn:"y"},
+    {code:"3361", msg:"읽지 않은 메시지 건수 조회 실패", yn:"y"},
+    {code:"3362", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3370", msg:"메시지 삭제 성공", yn:"y"},
+    {code:"3371", msg:"메시지 삭제 실패", yn:"y"},
+    {code:"3372", msg:"Internal Server Error", yn:"y"},
     
+    {code:"3380", msg:"받은 쪽지함 조회 성공", yn:"y"},
+    {code:"3381", msg:"받은 쪽지함 조회 실패", yn:"y"},
+    {code:"3382", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3390", msg:"보낸 쪽지함 조회 성공", yn:"y"},
+    {code:"3391", msg:"보낸 쪽지함 조회 실패", yn:"y"},
+    {code:"3392", msg:"Internal Server Error", yn:"y"},
+
 
 
 ]

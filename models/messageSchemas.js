@@ -52,12 +52,12 @@ const MessageSchemas = mongoose.Schema({
     text:true
   },
 
-  send_msg_deleteyn : {
+  send_msg_deleteyn : { //보낸 메시지 삭제
     type: Boolean,
     default:false
   },
 
-  receive_msg_deleteyn : {
+  receive_msg_deleteyn : { //받는 메시지 삭제
     type: Boolean,
     default:false
   },
