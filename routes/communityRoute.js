@@ -918,4 +918,191 @@ communityRoute.post("/subcommentupdate", getFields.none(), async (request, respo
   }
 });
 
+//커뮤니티 글 리스트 조회 - 사용자별 my info 에서 조회함 
+communityRoute.post("/communitylistsearchbyuser", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    const pageListCnt = commonModules.communitySearchPage; //10개씩 조회 
+    const lastSeq = parseInt(request.body.lastSeq); //직전 조회의 마지막 seq
+    const userseq = parseInt(request.body.userseq);
+    
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+      let searchCondition = {
+        userseq:userseq
+      };
+      
+      if(lastSeq > 0){
+        searchCondition.community_seq = {"$lt":lastSeq}
+      }
+      
+      const resObj = await Communities.find(
+        searchCondition
+      )
+      .sort({community_seq:-1})
+      .limit(pageListCnt)
+      // .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
+      ;
+
+      sendObj = commonModules.sendObjSet("3400", resObj);
+
+    }
+    
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3402", error));
+      
+  }
+});
+
+//커뮤니티 글에 대한 댓 리스트 조회 - 사용자별 my info 에서 조회함 
+communityRoute.post("/commentlistsearchbyuser", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    const pageListCnt = commonModules.communitySearchPage; //10개씩 조회 
+    const lastSeq = parseInt(request.body.lastSeq); //직전 조회의 마지막 seq
+    const userseq = parseInt(request.body.userseq);
+    
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+      let searchCondition = {
+          userseq:userseq
+      };
+      
+      if(lastSeq > 0){
+        searchCondition.comment_seq = {"$lt":lastSeq}
+      }
+      
+      const resObj = await Comments.find(
+        searchCondition
+      )
+      .sort({comment_seq:-1})
+      .limit(pageListCnt)
+      // .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
+      ;
+
+      sendObj = commonModules.sendObjSet("3410", resObj);
+
+    }
+    
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3412", error));
+      
+  }
+});
+
+//대댓글 리스트 조회 - 사용자별 my info 에서 조회함 
+communityRoute.post("/subcommentlistsearchbyuser", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    const pageListCnt = commonModules.communitySearchPage; //10개씩 조회 
+    const lastSeq = parseInt(request.body.lastSeq); //직전 조회의 마지막 seq
+    const userseq = parseInt(request.body.userseq);
+    
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+      let searchCondition = {
+        userseq:userseq
+      };
+      
+      if(lastSeq > 0){
+        searchCondition.subcomment_seq = {"$lt":lastSeq}
+      }
+      
+      const resObj = await SubComments.find(
+        searchCondition
+      )
+      .sort({subcomment_seq:-1})
+      .limit(pageListCnt)
+      // .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
+      ;
+
+      sendObj = commonModules.sendObjSet("3410", resObj);
+
+    }
+    
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3412", error));
+      
+  }
+});
+
+//좋아요 누른 커뮤니티 리스트
+communityRoute.post("/likecommunitylistsearchbyuser", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    const pageListCnt = commonModules.communitySearchPage; //10개씩 조회 
+    const lastSeq = parseInt(request.body.lastSeq); //직전 조회의 마지막 seq
+    const userseq = parseInt(request.body.userseq);
+    
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+      
+    if(!chechAuthRes){
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+      let searchCondition = {
+        userseq:userseq,
+        likeyn:true
+      };
+    
+      if(lastSeq > 0){
+        searchCondition.community_seq = {"$lt":lastSeq}
+      }
+      
+      const resObj = await CommunityLikes.find(
+        searchCondition
+      )
+      .sort({community_seq:-1})
+      .limit(pageListCnt)
+      .populate('communityinfo', {_id:1, community_seq:1, userseq:1, title:1, contents:1, hashtags:1, likecnt:1, commentcnt:1, regdate:1}).exec()
+      ;
+
+      sendObj = commonModules.sendObjSet("3420", resObj);
+
+    }
+    
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    console.log(error);
+    response.status(500).send(commonModules.sendObjSet("3422", error));
+      
+  }
+});
+
+
 module.exports=communityRoute

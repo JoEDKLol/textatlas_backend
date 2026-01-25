@@ -251,6 +251,18 @@ const codes = [
     {code:"3391", msg:"보낸 쪽지함 조회 실패", yn:"y"},
     {code:"3392", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3400", msg:"사용자별 커뮤니티리스트 조회 성공", yn:"y"},
+    {code:"3401", msg:"사용자별 커뮤니티리스트 조회 실패", yn:"y"},
+    {code:"3402", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3410", msg:"사용자별 커뮤니티리스트 댓글 조회 성공", yn:"y"},
+    {code:"3411", msg:"사용자별 커뮤니티리스트 댓글 조회 실패", yn:"y"},
+    {code:"3412", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3420", msg:"사용자별 좋아요 누른 커뮤니티 글 조회 성공", yn:"y"},
+    {code:"3421", msg:"사용자별 좋아요 누른 커뮤니티 글 조회 성공", yn:"y"},
+    {code:"3422", msg:"Internal Server Error", yn:"y"},
+
 
 
 ]

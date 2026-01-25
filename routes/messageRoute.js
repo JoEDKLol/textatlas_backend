@@ -258,7 +258,7 @@ messageRoute.post("/deletemessage", getFields.none(), async (request, response) 
     });
 
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     response.status(500).send(commonModules.sendObjSet("3372", error));
       
   }
