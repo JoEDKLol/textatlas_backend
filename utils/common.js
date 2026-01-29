@@ -260,8 +260,12 @@ const codes = [
     {code:"3412", msg:"Internal Server Error", yn:"y"},
 
     {code:"3420", msg:"사용자별 좋아요 누른 커뮤니티 글 조회 성공", yn:"y"},
-    {code:"3421", msg:"사용자별 좋아요 누른 커뮤니티 글 조회 성공", yn:"y"},
+    {code:"3421", msg:"사용자별 좋아요 누른 커뮤니티 글 조회 실패", yn:"y"},
     {code:"3422", msg:"Internal Server Error", yn:"y"},
+
+    {code:"3430", msg:"홈화면에서 책리스트 및 커뮤니티리스트 조회 성공", yn:"y"},
+    {code:"3431", msg:"홈화면에서 책리스트 및 커뮤니티리스트 조회 실패", yn:"y"},
+    {code:"3432", msg:"Internal Server Error", yn:"y"},
 
 
 
@@ -317,6 +321,13 @@ const getDateString = () => {
   return `${yyyy}${mm}${dd}`; // e.g., "20250430"
 };
 
+const getDateStringYYYYMM = () => {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0'); // 0부터 시작하므로 +1
+  return `${yyyy}${mm}`; // e.g., "20250430"
+};
+
 const getDateStringYYYYMMDDhhmmss = () => {
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -367,6 +378,7 @@ function processTextArray(inputArray) {
 module.exports.sendObjSet = sendObjSet;
 module.exports.getRandomNumber = getRandomNumber;
 module.exports.getDateString = getDateString;
+module.exports.getDateStringYYYYMM = getDateStringYYYYMM;
 module.exports.dictionarySearchPage = dictionarySearchPage;
 module.exports.readingPage = readingPage;
 module.exports.commentPage = commentPage;

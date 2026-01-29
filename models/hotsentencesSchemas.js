@@ -12,7 +12,7 @@ const getDateString = () => {
   return `${yyyy}${mm}`; // e.g., "20250430000000"
 };
 
-const HotwordSchemas = mongoose.Schema({
+const HotsentencesSchemas = mongoose.Schema({
   
   seq : {
     type: Number,
@@ -25,8 +25,18 @@ const HotwordSchemas = mongoose.Schema({
     index: true // 검색 성능 향상 
   },
 
-  word : {
-    type: String,
+  book_seq : {
+    type: Number,
+    index:true
+  },
+
+  page : {
+    type: Number,
+    index:true
+  },
+
+  sentenceindex : {
+    type: Number,
     index:true
   },
 
@@ -35,14 +45,31 @@ const HotwordSchemas = mongoose.Schema({
     index:true,
     default:1
   },
-  wordinfo   : {
-    type: mongoose.Schema.Types.ObjectId, 
-    required: true,
-    ref: "dictionary", 
+
+  sentence : {
+    type: String,
   },
+
+  translatedsentenceKR : {
+    type: String,
+  },
+
+  translatedsentenceES : {
+    type: String,
+  },
+  
   saveyn : { //저장했는지 여부 (최초에 모르는 단어 뜻을 확인, 그이후에는 저장할수 있음. )
     type: Boolean,
     default: false
+  },
+
+  book_title : {
+    type: String,
+    text: true
+  },
+
+  images : {
+    type: Array,
   },
 
   deleteyn : {
@@ -71,5 +98,5 @@ const HotwordSchemas = mongoose.Schema({
 
 
 
-const Hotwords=mongoose.model('hotword',HotwordSchemas)
-module.exports=Hotwords
+const Hotsentences=mongoose.model('Hotsentence',HotsentencesSchemas)
+module.exports=Hotsentences

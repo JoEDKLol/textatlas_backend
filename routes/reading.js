@@ -15,7 +15,9 @@ const Learningwords = require("../models/learningwordSchemas");
 const Learningsentences = require("../models/learningsentenceSchemas");
 const Translatedhistories = require('../models/translatedhistorySchemas');
 const Hotwords = require('../models/hotwordSchemas');
+const Hotsentence = require('../models/hotsentencesSchemas');
 const ReadingHistorySchemas = require('../models/readinghistorySchemas');
+const Hotsentences = require('../models/hotsentencesSchemas');
 
 
 //책정보 상세
@@ -459,48 +461,39 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
             { userseq:userseq,book_seq:book_seq},
             {$inc: { saved_word_cnt: 1 }}
           )
-
         }
-        
-          
+
 
         //hot word count
-        // const regday = commonModules.getDateString();
-        // const resHotwords = await Hotwords.findOne({
-        //   book_seq:book_seq,
-        //   page:page,
-        //   sentenceindex:sentenceindex, 
-        //   word:word.toLowerCase(),
-        // });
+        //해당 월에 동일한 단어가 등록되어있는 있는 경우 count + 1 을 한다.
+        const regdt = commonModules.getDateStringYYYYMM();
+        const resHotwords = await Hotwords.findOne({
+          regdt: regdt,
+          word:word.toLowerCase(),
+        });
 
-        // if(resHotwords){ //update
-        //   let upRes = await Hotwords.updateOne(
-        //   {
-        //     book_seq:book_seq,
-        //     page:page,
-        //     sentenceindex:sentenceindex, 
-        //     word:request.body.word.toLowerCase(),
-        //   },{
-        //     "count":resHotwords.count+1
-        //   })
-        // }else{ //save
-        //   const hotwordObj = {
-        //     book_seq:book_seq,
-        //     page:page,
-        //     sentenceindex:sentenceindex, 
-        //     word:request.body.word.toLowerCase(),
-        //     wordinfo:new ObjectId(request.body.wordid),
-        //     sentence:sentence,
-        //     reguser:request.body.email,
-        //     upduser:request.body.email, 
-        //   }
-        //   const newHotwords =new Hotwords(hotwordObj);
-        //   let resNewHotwords=await newHotwords.save();  
-        // }
+        if(resHotwords){
+          let upRes = await Hotwords.updateOne(
+            {
+              regdt: regdt,
+              word:word.toLowerCase(),
+            },
+            {"$inc" : {"count" : 1}} // score의 값을 1 증가시킨다.
+          )
+        }else{
+          //seq 번호 채번
+          const seq = await sequence.getSequence("hotword_seq");
+          const hotwordObj = {
+            seq:seq,
+            word:word.toLowerCase(),
+            wordinfo:new ObjectId(request.body.wordid),
+            reguser:request.body.email,
+            upduser:request.body.email, 
+          }
 
-        // await session.commitTransaction();
-        // session.endSession();
-
+          const newHotwords =new Hotwords(hotwordObj);
+          const resNewHotwords=await newHotwords.save();  
+        }
         
 
         await session.commitTransaction();
@@ -517,7 +510,7 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
-    console.log(error);
+    // console.log(error);
     response.status(500).send(commonModules.sendObjSet("1202", error));
   }
 });
@@ -584,7 +577,53 @@ readingRoute.post("/savesentence", getFields.none(), async (request, response) =
             {$inc: { saved_sentence_cnt: 1 }}
           )
         }
+
+        //hotsentence 저장
+        //해당 월에 동일한 단어가 등록되어있는 있는 경우 count + 1 을 한다.
+        const regdt = commonModules.getDateStringYYYYMM();
+        const resHotsentences = await Hotsentences.findOne({
+          regdt: regdt,
+          book_seq: book_seq,
+          page:page,
+          sentenceindex:sentenceindex,
+        });  
+
+        if(resHotsentences){
+          let upRes = await Hotsentences.updateOne(
+            {
+              regdt: regdt,
+              book_seq: book_seq,
+              page:page,
+              sentenceindex:sentenceindex,
+            },
+            {"$inc" : {"count" : 1}} // score의 값을 1 증가시킨다.
+          )
+        }else{
+          //seq 번호 채번
+          const seq = await sequence.getSequence("hotsentence_seq");
+          const hotSentenceObj = {
+            seq:seq,
+            regdt: regdt,
+            book_seq: book_seq,
+            page:page,
+            sentenceindex:sentenceindex,
+            sentence:sentence,
+            translatedsentenceKR:translatedsentenceKR,
+            translatedsentenceES:translatedsentenceES,
+            book_title:book_title,
+            images:images,
+            reguser:request.body.email,
+            upduser:request.body.email, 
+          }
+
+          const newHotsentences =new Hotsentences(hotSentenceObj);
+          const resHotsentences=await newHotsentences.save();  
+        }
+
         
+        await session.commitTransaction();
+        session.endSession();
+
         sendObj = commonModules.sendObjSet("1210");
         ;
         
@@ -593,7 +632,7 @@ readingRoute.post("/savesentence", getFields.none(), async (request, response) =
       sendObj
     });
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }

@@ -1104,5 +1104,31 @@ communityRoute.post("/likecommunitylistsearchbyuser", getFields.none(), async (r
   }
 });
 
+//커뮤니티 글 리스트 조회 - 홈에서 조회
+communityRoute.post("/communitylistsearchhome", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+    const pageListCnt = 10; //10개씩 조회 
+    
+    
+    const resObj = await Communities.find()
+    .sort({community_seq:-1})
+    .limit(pageListCnt)
+    .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
+    ;
+
+    sendObj = commonModules.sendObjSet("3190", resObj);
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    response.status(500).send(commonModules.sendObjSet("3192", error));
+      
+  }
+});
 
 module.exports=communityRoute

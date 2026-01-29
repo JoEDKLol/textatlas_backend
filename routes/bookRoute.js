@@ -10,7 +10,9 @@ const commonModules = require("../utils/common");
 // const { default: mongoose } = require('mongoose')
 // const db = mongoose.connection;
 // const sequence = require("../utils/sequences");
-
+const Communities = require('../models/communitySchemas');
+const Hotwords = require('../models/hotwordSchemas');
+const Hotsentences = require('../models/hotsentencesSchemas');
 bookRoute.get("/booksearch", getFields.none(), async (request, response) => {
   try {
       
@@ -130,6 +132,70 @@ bookRoute.get("/bookdetail", getFields.none(), async (request, response) => {
   } catch (error) {
     // console.log(error);
     response.status(500).send(commonModules.sendObjSet("3012", error));
+      
+  }
+});
+
+// 
+bookRoute.get("/homebooksearch", getFields.none(), async (request, response) => {
+  try {
+      
+    let sendObj = {};
+
+
+    const currentPage = request.query.currentPage;
+    const pageListCnt = 16; //16개씩 조회 
+      
+    let booksDate = await Books.find({},{
+        "book_seq":1,
+        "book_id":1,
+        "title":1,
+        "book_title":1,
+        "images":1,
+      })
+    .sort({book_seq:-1})
+    .lean()
+    .skip(0)
+    .limit(pageListCnt);
+    ;
+
+    //최신커뮤니티글조회
+    const communitiesObj = await Communities.find()
+    .sort({community_seq:-1})
+    .limit(6)
+    .populate('userinfo', {_id:1, userseq:1, email:1, username:1, userimg:1, userthumbImg:1, introduction:1}).exec()
+    ;
+
+    const regdt = commonModules.getDateStringYYYYMM();
+    //howwords 조회
+    const hotwords = await Hotwords.find({regdt:regdt})
+    .sort({count:-1, seq:-1})
+    .limit(6)
+    .populate('wordinfo', {_id:0, meaningKR:1, reworkmeaningKR:1, reworkynKR:1, meaningES:1, reworkmeaningES:1, reworkynES:1}).exec()
+    ;
+
+    //hotsentence 조회
+    const hotsentences = await Hotsentences.find({regdt:regdt})
+    .sort({count:-1})
+    .limit(6)
+
+    const resObj = {
+      books : booksDate,
+      communities : communitiesObj,
+      hotwords : hotwords,
+      hotsentences : hotsentences,
+
+    }
+    
+    sendObj = commonModules.sendObjSet("3430", resObj);
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    // console.log(error);
+    response.status(500).send(commonModules.sendObjSet("3432", error));
       
   }
 });
