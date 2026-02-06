@@ -18,11 +18,12 @@ const Hotwords = require('../models/hotwordSchemas');
 const Hotsentence = require('../models/hotsentencesSchemas');
 const ReadingHistorySchemas = require('../models/readinghistorySchemas');
 const Hotsentences = require('../models/hotsentencesSchemas');
+const logger = require('../utils/logger');
 
 
 //책정보 상세
 readingRoute.post("/readingbypage", getFields.none(), async (request, response) => {
-
+  const session = await mongoose.startSession();
   try {
     
 
@@ -34,7 +35,7 @@ readingRoute.post("/readingbypage", getFields.none(), async (request, response) 
       sendObj = commonModules.sendObjSet("2011");
     }else{
       let date = new Date().toISOString();
-      const session = await mongoose.startSession();
+      
       const book_seq = request.body.book_seq;
       const userseq = request.body.userseq; //사용자별 읽기 히스토리를 저장한다.
       const email = request.body.email;
@@ -90,9 +91,6 @@ readingRoute.post("/readingbypage", getFields.none(), async (request, response) 
           {book_seq:book_seq},
           {$inc: { viewcount: 1 }}
         )
-
-        // console.log(upRes);
-
       }
 
       let booksDate = await Books.findOne({book_seq:book_seq},
@@ -103,15 +101,10 @@ readingRoute.post("/readingbypage", getFields.none(), async (request, response) 
       )
       ;
 
-      
-      // console.log(commonModules.processTextArray(booksDate.pages[0].contentarr));
 
       if(!booksDate.pages[0].tranlatorYn){ 
         // console.log("번역 실행");
         let arr = commonModules.processTextArray(booksDate.pages[0].contentarr); 
-        // for(let i=0; i<booksDate.pages[0].contentarr.length; i++){
-        //   arr.push(booksDate.pages[0].contentarr[i].replace(/\n|\r/g, ' '))
-        // }
         
         const translatorKr = await translate.getKoreanTranslationDeepl(arr);
         const translatorEs = await translate.getSpanishTranslationDeepl(arr);
@@ -127,6 +120,7 @@ readingRoute.post("/readingbypage", getFields.none(), async (request, response) 
             contentarr : translatorEs,
           }
 
+
           //번역된 내용은 업데이트 한다.
           let updateBook = await Books.findOneAndUpdate(
             {book_seq:book_seq},
@@ -141,6 +135,7 @@ readingRoute.post("/readingbypage", getFields.none(), async (request, response) 
           )  
         }else{ //번역 실패
           sendObj = commonModules.sendObjSet("3023");
+          // console.log("번역 실패");
           throw new Error(sendObj.code);
         }
 
@@ -178,7 +173,8 @@ readingRoute.post("/readingbypage", getFields.none(), async (request, response) 
       
       const resObj = {
         bookData:booksDateF, 
-        currentPage:currnet_page
+        currentPage:currnet_page,
+        readcompletedt:(readingHis)?readingHis.readcompletedt:""
       }
 
       sendObj = commonModules.sendObjSet("3020", resObj);
@@ -189,15 +185,71 @@ readingRoute.post("/readingbypage", getFields.none(), async (request, response) 
     });
 
   } catch (error) {
-
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
-
     let obj = commonModules.sendObjSet(error.message); //code
     if(obj.code === ""){
       obj = commonModules.sendObjSet("3022");
     }
+    
+    logger.error(error.message,  {...obj, stack:error.stack});
+    response.status(500).send(obj);
+      
+  }
+});
+
+//책읽기완료  
+readingRoute.post("/finishbook", getFields.none(), async (request, response) => {
+
+  try {
+    
+
+    let sendObj = {};
+    let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
+    
+    if(!chechAuthRes){
+      
+      sendObj = commonModules.sendObjSet("2011");
+    }else{
+      let date = new Date().toISOString();
+      const book_seq = request.body.book_seq;
+      const userseq = request.body.userseq; //사용자별 읽기 히스토리를 저장한다.
+      const email = request.body.email;
+      
+      //Readinghistories 에서 사용자별 책 읽기 기록 조회
+      let readingHis = await Readinghistories.findOne({userseq:userseq, book_seq:book_seq});
+      
+       //사용자별 읽기 히스토리 업데이트 
+      
+      let updateReadinghistories = await Readinghistories.findOneAndUpdate(
+        {
+          userseq:userseq,
+          book_seq:book_seq,
+        },
+        {
+          "readcompletedt":commonModules.getDateStringYYYYMMDDhhmmss(),
+          "upddate":date,
+          "updUser":email
+        },
+      )
+
+      sendObj = commonModules.sendObjSet("3440", date);
+    }
+
+    response.status(200).send({
+        sendObj
+    });
+
+  } catch (error) {
+    // console.log(error);
+
+
+    let obj = commonModules.sendObjSet(error.message); //code
+    if(obj.code === ""){
+      obj = commonModules.sendObjSet("3442");
+    }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
       
   }
@@ -233,6 +285,7 @@ readingRoute.post("/readhissearch", getFields.none(), async (request, response) 
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3032"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3032", error));
       
   }
@@ -245,6 +298,7 @@ readingRoute.post("/readhissearch", getFields.none(), async (request, response) 
 // 2) 사용자별 번역 히스토리에 이력이 없으면 저장
 // 3) 사용자가 저장한 단어 또는 문장인지 조회
 readingRoute.post("/translationword", getFields.none(), async (request, response) => {
+  const session = await mongoose.startSession();
   try {
 
     let sendObj = {};
@@ -254,11 +308,7 @@ readingRoute.post("/translationword", getFields.none(), async (request, response
     if(!chechAuthRes){
       sendObj = commonModules.sendObjSet("2011");
     }else{
-      
-      const session = await mongoose.startSession();
       session.startTransaction();
-
-
       const book_seq = request.body.book_seq;
       const userseq = request.body.userseq;
       const page = request.body.page; //현재 책 page
@@ -400,11 +450,13 @@ readingRoute.post("/translationword", getFields.none(), async (request, response
     if(obj.code === ""){
       obj = commonModules.sendObjSet("3042");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });
 
 readingRoute.post("/saveword", getFields.none(), async (request, response) => {
+  const session = await mongoose.startSession();
   try {
 
     let sendObj = {};
@@ -414,7 +466,7 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
       if(!chechAuthRes){
         sendObj = commonModules.sendObjSet("2011");
       }else{
-        const session = await mongoose.startSession();
+        
         session.startTransaction();
 
         const userseq = request.body.userseq;
@@ -511,6 +563,7 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
       await session.abortTransaction();
     }
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("1202"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("1202", error));
   }
 });
@@ -518,6 +571,7 @@ readingRoute.post("/saveword", getFields.none(), async (request, response) => {
 
 
 readingRoute.post("/savesentence", getFields.none(), async (request, response) => {
+  const session = await mongoose.startSession();
   try {
 
     let sendObj = {};
@@ -528,7 +582,7 @@ readingRoute.post("/savesentence", getFields.none(), async (request, response) =
         sendObj = commonModules.sendObjSet("2011");
       }else{
 
-        const session = await mongoose.startSession();
+        
         session.startTransaction();
 
         const userseq = request.body.userseq;
@@ -632,10 +686,11 @@ readingRoute.post("/savesentence", getFields.none(), async (request, response) =
       sendObj
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
+    logger.error(error.message,  {...commonModules.sendObjSet("1212"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("1212", error));
   }
 });

@@ -22,8 +22,8 @@ commonRoute.get("/getlanguageset", getFields.none(), async (request, response) =
       });
 
   } catch (error) {
-      console.log(error);
-      response.status(500).send(commonModules.sendObjSet("9012", error));
+    logger.error(error.message,  {...commonModules.sendObjSet("9012"), stack:error.stack});
+    response.status(500).send(commonModules.sendObjSet("9012", error));
       
   }
 });

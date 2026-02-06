@@ -24,10 +24,14 @@ const historyRoute = require('./routes/historyRoute');
 const administratorRouter = require('./routes/administratorRoute');
 const communityRoute = require('./routes/communityRoute');
 const messageRoute = require('./routes/messageRoute');
+const logger = require('./utils/logger');
 const publicPath = path.join(__dirname, "uploads"); //정적파일 로드 
 
 
-const app = express()
+const app = express();
+
+// AWS ALB(로드밸런서)를 거쳐올 때 원본 IP를 신뢰하도록 설정
+// app.set('trust proxy', true);
 
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
@@ -73,7 +77,12 @@ app.use('/message',messageRoute);
 // app.use('/blog',blogRouter);
 
 app.use((err, req, res, next) => {
-  console.log("index.js");
+  
+  logger.error(err.message, { 
+      error_id: "index", 
+      description: err.message,
+      stack: err.stack
+   });
   res.status(500).send('Internal Server Error');
 });
 

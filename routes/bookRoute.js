@@ -88,6 +88,7 @@ bookRoute.get("/booksearch", getFields.none(), async (request, response) => {
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3002"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3002", error));
       
   }
@@ -131,6 +132,7 @@ bookRoute.get("/bookdetail", getFields.none(), async (request, response) => {
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3012"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3012", error));
       
   }
@@ -195,6 +197,7 @@ bookRoute.get("/homebooksearch", getFields.none(), async (request, response) => 
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3432"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3432", error));
       
   }

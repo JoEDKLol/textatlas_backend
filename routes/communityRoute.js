@@ -84,6 +84,7 @@ communityRoute.post('/fileUploadS3',  async (request, response) => {
     if(obj.code === ""){
       obj = commonModules.sendObjSet("9102");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });
@@ -117,6 +118,7 @@ communityRoute.post("/fileDeleteS3", getFields.none(), async (request, response)
     if(obj.code === ""){
       obj = commonModules.sendObjSet("9112");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });
@@ -164,23 +166,24 @@ communityRoute.post("/fileDeleteS3withuser", getFields.none(), async (request, r
     if(obj.code === ""){
       obj = commonModules.sendObjSet("9122");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });
 
 //글쓰기 저장
 communityRoute.post("/savecommunitywriting", getFields.none(), async (request, response) => {
+  const session = await mongoose.startSession();
   try {
     
     let sendObj = {};
-
     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
     
     if(!chechAuthRes){
       sendObj = commonModules.sendObjSet("2011");
     }else{
       // Communities //
-      const session = await mongoose.startSession();
+      
       const userseq = request.body.userseq;
       const userinfo = new ObjectId(request.body.userinfo);;
       const title = request.body.title;
@@ -255,12 +258,14 @@ communityRoute.post("/savecommunitywriting", getFields.none(), async (request, r
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
+    logger.error(error.message,  {...commonModules.sendObjSet("3182"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3182", error));
   }
 });
 
 //커뮤니티글 업데이트
 communityRoute.post("/updatecommunitywriting", getFields.none(), async (request, response) => {
+  const session = await mongoose.startSession();
   try {
     
     let sendObj = {};
@@ -271,7 +276,7 @@ communityRoute.post("/updatecommunitywriting", getFields.none(), async (request,
       sendObj = commonModules.sendObjSet("2011");
     }else{
       // Communities //
-      const session = await mongoose.startSession();
+      
       const userseq = parseInt(request.body.userseq);
       const title = request.body.title;
       const contents = request.body.contents;
@@ -351,6 +356,7 @@ communityRoute.post("/updatecommunitywriting", getFields.none(), async (request,
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
+    logger.error(error.message,  {...commonModules.sendObjSet("3322"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3322", error));
   }
 });
@@ -417,6 +423,7 @@ communityRoute.post("/communitylistsearch", getFields.none(), async (request, re
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3192"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3192", error));
       
   }
@@ -448,6 +455,7 @@ communityRoute.get("/taglistsearch", getFields.none(), async (request, response)
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3202"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3202", error));
       
   }
@@ -475,6 +483,7 @@ communityRoute.get("/communitydetailsearch", getFields.none(), async (request, r
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3212"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3212", error));
   }
 });
@@ -502,6 +511,7 @@ communityRoute.get("/communitydetailusersearch", getFields.none(), async (reques
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3312"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3312", error));
   }
 });
@@ -530,23 +540,26 @@ communityRoute.get("/communitylikebyuser", getFields.none(), async (request, res
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3222"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3222", error));
   }
 });
 
 //커뮤니티 글 좋아요 업데이트
 communityRoute.post("/communitylikeupdate", getFields.none(), async (request, response) => {
+  
+  const session = await mongoose.startSession();
+  
   try {
       
-    let sendObj = {};
-    
+    let sendObj = {};    
     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
     
     if(!chechAuthRes){
       sendObj = commonModules.sendObjSet("2011");
     }else{
     
-      const session = await mongoose.startSession();
+      
       const community_seq = parseInt(request.body.community_seq);
       const userseq = parseInt(request.body.userseq);
       const email = request.body.email;
@@ -610,12 +623,14 @@ communityRoute.post("/communitylikeupdate", getFields.none(), async (request, re
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
+    logger.error(error.message,  {...commonModules.sendObjSet("3232"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3232", error));
   }
 });
 
 //커뮤니티 글에 대한 댓글 저장하기
 communityRoute.post("/commentsave", getFields.none(), async (request, response) => {
+  const session = await mongoose.startSession();
   try {
     let sendObj = {};
 
@@ -624,7 +639,7 @@ communityRoute.post("/commentsave", getFields.none(), async (request, response) 
       sendObj = commonModules.sendObjSet("2011");
     }else{
 
-      const session = await mongoose.startSession();
+      
       session.startTransaction(); // 트랜잭션을 시작합니다.
 
       const community_seq = parseInt(request.body.community_seq);
@@ -678,7 +693,7 @@ communityRoute.post("/commentsave", getFields.none(), async (request, response) 
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
-
+    logger.error(error.message,  {...commonModules.sendObjSet("3242"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3242", error));
   }
 });
@@ -722,12 +737,14 @@ communityRoute.get("/commentsearch", getFields.none(), async (request, response)
 
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3252"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3252", error));
   }
 });
 
 //커뮤니티 글에 대한 댓글 저장하기
 communityRoute.post("/subcommentsave", getFields.none(), async (request, response) => {
+  const session = await mongoose.startSession();
   try {
     let sendObj = {};
     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
@@ -735,7 +752,7 @@ communityRoute.post("/subcommentsave", getFields.none(), async (request, respons
       sendObj = commonModules.sendObjSet("2011");
     }else{
 
-      const session = await mongoose.startSession();
+      
       session.startTransaction(); // 트랜잭션을 시작합니다.
 
       const community_seq = parseInt(request.body.community_seq);
@@ -786,7 +803,7 @@ communityRoute.post("/subcommentsave", getFields.none(), async (request, respons
     if (session.inTransaction()) { // 트랜잭션이 활성 상태일 때만 롤백 시도
       await session.abortTransaction();
     }
-
+    logger.error(error.message,  {...commonModules.sendObjSet("3252"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3252", error));
   }
 });
@@ -831,6 +848,7 @@ communityRoute.get("/subcommentsearch", getFields.none(), async (request, respon
 
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3272"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3272", error));
   }
 });
@@ -872,6 +890,7 @@ communityRoute.post("/commentupdate", getFields.none(), async (request, response
     if(obj.code === ""){
       obj = commonModules.sendObjSet("3292");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });
@@ -914,6 +933,7 @@ communityRoute.post("/subcommentupdate", getFields.none(), async (request, respo
     if(obj.code === ""){
       obj = commonModules.sendObjSet("3302");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });
@@ -959,6 +979,7 @@ communityRoute.post("/communitylistsearchbyuser", getFields.none(), async (reque
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3402"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3402", error));
       
   }
@@ -1005,6 +1026,7 @@ communityRoute.post("/commentlistsearchbyuser", getFields.none(), async (request
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3412"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3412", error));
       
   }
@@ -1051,6 +1073,7 @@ communityRoute.post("/subcommentlistsearchbyuser", getFields.none(), async (requ
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3412"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3412", error));
       
   }
@@ -1098,7 +1121,7 @@ communityRoute.post("/likecommunitylistsearchbyuser", getFields.none(), async (r
     });
 
   } catch (error) {
-    console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3422"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3422", error));
       
   }
@@ -1126,6 +1149,7 @@ communityRoute.post("/communitylistsearchhome", getFields.none(), async (request
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3192"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3192", error));
       
   }

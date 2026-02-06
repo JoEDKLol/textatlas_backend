@@ -5,125 +5,21 @@ let getFields=multer()
 const commonModules = require("../utils/common");
 const { default: mongoose } = require('mongoose')
 const db = mongoose.connection;
-const { sendEmail } = require('../utils/sendMail');
+const { sendEmailInquiry } = require('../utils/sendMail');
+
 const checkAuth = require('../utils/checkAuth');
 const Dictionaries = require("../models/dictionarySchemas"); 
 const ObjectId = require("mongoose").Types.ObjectId;
+const Inquiries = require("../models/inquirySchemas");
+const sequence = require("../utils/sequences");
 
-//administrator
-// administratorRoute.get("/codesearch", getFields.none(), async (request, response) => { 
-//   try {
-//     let sendObj = {};
-    
-//     const subcode = request.query.subcode;
-//     const type = request.query.type;
-
-//     let retCode
-//     if(type === "a"){
-//       retCode = await code.getSubCodeStr(subcode);
-//     }else if(type === "b"){
-//       retCode = await code.getSubCodeArr(subcode.split(","));
-//     }
-
-//     if(retCode === "error"){
-//       sendObj = commonModules.sendObjSet("9001");
-//     }else{
-//       sendObj = commonModules.sendObjSet("9000", retCode);
-//     }
-    
-    
-//     response.status(200).send({
-//       sendObj
-//   });
-//   } catch (error) {
-    
-//     response.status(500).send(obj);
-//   }
-// });
-
-// administratorRoute.post("/saveaticles", getFields.none(), async (request, response) => { 
-//   let sendObj = {};
-//   try{
-
-//     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
-
-
-
-//     if(!chechAuthRes){
-//       sendObj = commonModules.sendObjSet("2011");
-//     }else{
-
-//       const articleArr = request.body.articleArr
-//       let articleArrInsert = [];
-//       for(let i=0; i<articleArr.length; i++){
-        
-//         const article_seq = await sequence.getSequence("article_seq");
-//         const obj = {
-//           articleseq: article_seq, 
-//           level:articleArr[i].level, 
-//           category:articleArr[i].category, 
-//           categorydetail:articleArr[i].categorydetail, 
-//           title:articleArr[i].title, 
-//           contenten:articleArr[i].contenten, 
-//           img:articleArr[i].img, 
-//           link:articleArr[i].link, 
-//           reguser:"AI System",
-//           upduser:"AI System",
-//         }
-//         articleArrInsert.push(obj);
-//       }
-
-//       const result = await Article.insertMany(articleArrInsert);
-
-//       sendObj = commonModules.sendObjSet("9010");
-
-
-//       response.status(200).send({
-//           sendObj
-//       });
-//     }
-
-//   }catch(error){
-//     response.status(500).send(commonModules.sendObjSet("9012", error));
-//   }
-// });
-
-
-//
-// administratorRoute.post("/deletearticles", getFields.none(), async (request, response) => { 
-//   let sendObj = {};
-//   try{
-
-//     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
-
-
-
-//     if(!chechAuthRes){
-//       sendObj = commonModules.sendObjSet("2011");
-//     }else{
-
-//       sendObj = commonModules.sendObjSet("9020");
-//       response.status(200).send({
-//           sendObj
-//       });
-//     }
-
-//   }catch(error){
-//     response.status(500).send(commonModules.sendObjSet("9022", error));
-//   }
-// });
 
 administratorRoute.get("/searchwordlist", getFields.none(), async (request, response) => { 
   let sendObj = {};
 
-  // console.log("여기 온다?");
-  
   try{
 
     let chechAuthRes = checkAuth.checkAuth(request.headers.accesstoken);
-    
-    
-
 
     if(!chechAuthRes){ 
       sendObj = commonModules.sendObjSet("2011");
@@ -137,7 +33,8 @@ administratorRoute.get("/searchwordlist", getFields.none(), async (request, resp
       const word = request.query.word;
 
       const findObj = {
-        word: { $regex: new RegExp(`^${word}`, 'i') }, deleteyn:'n'
+        word: { $regex: new RegExp(`^${word}`, 'i') }, 
+        // deleteyn:'n'
       }
 
       if(reworkyn){
@@ -162,6 +59,7 @@ administratorRoute.get("/searchwordlist", getFields.none(), async (request, resp
 
   }catch(error){
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("9032"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("9032", error));
   }
 });
@@ -237,6 +135,7 @@ administratorRoute.post("/administratorwordupdate", getFields.none(), async (req
 
   }catch(error){
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("9042"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("9042", error));
   }
 });
@@ -300,7 +199,8 @@ administratorRoute.post("/administratorwordlistsave", getFields.none(), async (r
     }
 
   }catch(error){
-    console.log(error);
+    
+    logger.error(error.message,  {...commonModules.sendObjSet("9052"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("9052", error));
   }
 });
@@ -326,7 +226,8 @@ administratorRoute.get("/searchwordlistes", getFields.none(), async (request, re
       const word = request.query.word;
 
       const findObj = {
-        word: { $regex: new RegExp(`^${word}`, 'i') }, deleteyn:'n'
+        word: { $regex: new RegExp(`^${word}`, 'i') }, 
+        // deleteyn:'n'
       }
 
       if(reworkyn){
@@ -348,7 +249,7 @@ administratorRoute.get("/searchwordlistes", getFields.none(), async (request, re
     }
 
   }catch(error){
-    console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("9032"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("9032", error));
   }
 });
@@ -423,6 +324,7 @@ administratorRoute.post("/administratorwordupdatees", getFields.none(), async (r
 
   }catch(error){
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("9042"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("9042", error));
   }
 });
@@ -487,9 +389,75 @@ administratorRoute.post("/administratorwordlistsavees", getFields.none(), async 
 
   }catch(error){
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("9052"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("9052", error));
   }
 });
+
+//Contact Us 사용자가 문의사항 전달
+administratorRoute.post("/contactussend", getFields.none(), async (request, response) => { 
+  let sendObj = {};
+  try{
+
+    const email = request.body.email;
+    const inquiry = request.body.inquiry;
+    const content = request.body.content;
+    const userinfo = request.body.userinfo;
+    const nameField = request.body.nameField;
+    const useremail = request.body.useremail;
+    const language = request.body.language;
+
+    
+
+    if(nameField){ //허니팟 봇인경우 완료처리 리턴해줌
+      sendObj = commonModules.sendObjSet("9050");
+    }else{
+      // 고객에게 email 전송
+      
+
+      const inquiry_seq = await sequence.getSequence("inquiry_seq");
+      const inquiryObj = {
+        inquiry_seq:inquiry_seq,
+        email:email,
+        inquiry:inquiry,
+        content:content,
+        userinfo:(userinfo)?new ObjectId(userinfo):null,
+        ip_address:request.ip,
+        reguser:(useremail)?useremail:email,
+        upduser:(useremail)?useremail:email, 
+      }
+      
+      const resEmailSend = await sendEmailInquiry(email, language, inquiryObj);
+      // console.log(resEmailSend);
+      // const newDictionaries =new Dictionaries(dictionarykrsObj);
+      //     let resDictionaries=await newDictionaries.save();
+
+      const newInquiries = new Inquiries(inquiryObj);
+      const resInquiries = await newInquiries.save();
+
+
+      // const session = await db.startSession();
+      // session.startTransaction(); 
+
+      
+
+      // await session.commitTransaction();
+      // session.endSession();
+
+      sendObj = commonModules.sendObjSet("9050");
+    }
+
+    response.status(200).send({
+        sendObj
+    });
+    
+
+  }catch(error){
+    logger.error(error.message,  {...commonModules.sendObjSet("9052"), stack:error.stack});
+    response.status(500).send(commonModules.sendObjSet("9052", error));
+  }
+});
+
 
 
 module.exports=administratorRoute

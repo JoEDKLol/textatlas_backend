@@ -24,7 +24,7 @@ const HotwordSchemas = mongoose.Schema({
     default: getDateString,
     index: true // 검색 성능 향상 
   },
-
+  
   word : {
     type: String,
     index:true

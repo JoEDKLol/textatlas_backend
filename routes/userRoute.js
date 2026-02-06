@@ -13,6 +13,7 @@ const db = mongoose.connection;
 const sequence = require("../utils/sequences");
 const { sendEmail } = require('../utils/sendMail');
 const checkAuth = require('../utils/checkAuth');
+const logger = require('../utils/logger');
 
 // userRoute.get("/", getFields.none(), async (request, response) => {
 //   try {
@@ -127,6 +128,7 @@ userRoute.post("/sendemail", getFields.none(), async (request, response) => {
     if(obj.code === ""){
       obj = commonModules.sendObjSet("1013");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });
@@ -151,6 +153,7 @@ userRoute.get("/checkverifynumber", getFields.none(), async (request, response) 
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("1022"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("1022", error));
   }
 });
@@ -189,6 +192,7 @@ userRoute.post("/signup", getFields.none(), async (request, response) => {
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("1002"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("1002", error));
   }
 });
@@ -237,6 +241,7 @@ userRoute.get("/getAccessToken", getFields.none(), async (request, response) => 
 
       response.send({sendObj});
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("2002"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("2002", error));
       
   }
@@ -328,6 +333,7 @@ userRoute.post("/signin", getFields.none(), async (request, response) => {
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("1051"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("1051", error));
   }
 });
@@ -387,7 +393,7 @@ userRoute.post("/googlesignin", getFields.none(), async (request, response) => {
           introduction : resusers.introduction,
         }
         response.setHeader("refreshtoken", refreshtoken);
-        sendObj = commonModules.sendObjSet("1050", resUserObj);
+        sendObj = commonModules.sendObjSet("1050g", resUserObj);
           
       }else{
 
@@ -419,7 +425,7 @@ userRoute.post("/googlesignin", getFields.none(), async (request, response) => {
         }
 
         response.setHeader("refreshtoken", refreshtoken);
-        sendObj = commonModules.sendObjSet("1050", resUserObj);
+        sendObj = commonModules.sendObjSet("1050g", resUserObj);
       }
       response.status(200).send({
           sendObj
@@ -427,7 +433,8 @@ userRoute.post("/googlesignin", getFields.none(), async (request, response) => {
 
 
   }catch (error) {
-    response.status(500).send(commonModules.sendObjSet("1051", error));
+    logger.error(error.message,  {...commonModules.sendObjSet("1051g"), stack:error.stack});
+    response.status(500).send(commonModules.sendObjSet("1051g", error));
   }
 
 });
@@ -476,7 +483,8 @@ userRoute.post("/checkaccessToken", getFields.none(), async (request, response) 
     response.send({sendObj});
 
   } catch (error) {
-      response.status(500).send(commonModules.sendObjSet("2011", error));
+    logger.error(error.message,  {...commonModules.sendObjSet("2011"), stack:error.stack});
+    response.status(500).send(commonModules.sendObjSet("2011", error));
   }
 });
 
@@ -496,8 +504,8 @@ userRoute.get("/logout", getFields.none(), async (request, response) => {
       response.send({sendObj});
 
   } catch (error) {
-
-      response.status(500).send(commonModules.sendObjSet("2022", error));
+    logger.error(error.message,  {...commonModules.sendObjSet("2022"), stack:error.stack});
+    response.status(500).send(commonModules.sendObjSet("2022", error));
   }
 });
 
@@ -604,6 +612,7 @@ userRoute.post("/sendemailforpassword", getFields.none(), async (request, respon
     if(obj.code === ""){
       obj = commonModules.sendObjSet("1033");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });
@@ -632,6 +641,7 @@ userRoute.post("/changepassword", getFields.none(), async (request, response) =>
     });
 
   }catch(error){
+    logger.error(error.message,  {...commonModules.sendObjSet("1042"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("1042", error));
   }
 });
@@ -665,6 +675,7 @@ userRoute.post("/usertranslatorupdate", getFields.none(), async (request, respon
     });
 
   }catch(error){
+    logger.error(error.message,  {...commonModules.sendObjSet("1062"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("1062", error));
   }
 });
@@ -708,6 +719,7 @@ userRoute.post("/userupdate", getFields.none(), async (request, response) => {
     if(obj.code === ""){
       obj = commonModules.sendObjSet("3282");
     }
+    logger.error(error.message,  {...obj, stack:error.stack});
     response.status(500).send(obj);
   }
 });

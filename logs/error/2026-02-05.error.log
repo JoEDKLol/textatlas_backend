@@ -1,0 +1,10 @@
+2026-02-05 23:44:33 [error]: 테스트입니다.
+2026-02-05 23:45:28 [error]: 테스트입니다.
+2026-02-05 23:55:02 [error]: session is not defined
+2026-02-05 23:56:49 [error]: session is not defined
+2026-02-05 23:59:46 [error]: session is not defined
+{
+  "error_id": "index",
+  "description": "session is not defined",
+  "stack": "ReferenceError: session is not defined\n    at C:\\bootcampproject\\my_project\\TextAtlas\\textatlas_backend\\routes\\reading.js:202:5\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)"
+}

@@ -110,8 +110,8 @@ historyRoute.get("/booklistsearch", getFields.none(), async (request, response) 
                 $cond: [
                   {
                     $and: [
-                      { $eq: ["$readcompletedt", true] }, // read_complete_time 필드가 존재하는 경우
-                      { $ne: ["$read_complete_time", null] }     // read_complete_time 필드 값이 null이 아닌 경우
+                      { $eq: ["$isCompletedFieldPresent", true] }, // read_complete_time 필드가 존재하는 경우
+                      { $ne: ["$readcompletedt", null] }     // read_complete_time 필드 값이 null이 아닌 경우
                     ]
                   },
                   1, // 조건을 만족하면 1을 더합니다.
@@ -142,6 +142,7 @@ historyRoute.get("/booklistsearch", getFields.none(), async (request, response) 
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3052"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3052", error));
       
   }
@@ -187,6 +188,7 @@ historyRoute.get("/booksavedwordsearch", getFields.none(), async (request, respo
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3062"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3062", error));
       
   }
@@ -231,6 +233,7 @@ historyRoute.get("/booksavedsentencesearch", getFields.none(), async (request, r
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3072"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3072", error));
       
   }
@@ -286,6 +289,7 @@ historyRoute.get("/translatesentenceword", getFields.none(), async (request, res
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3082"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3082", error));
       
   }
@@ -324,6 +328,7 @@ historyRoute.post("/wordimportance", getFields.none(), async (request, response)
       sendObj
     });
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3092"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3092", error));
   }
 });
@@ -359,6 +364,7 @@ historyRoute.post("/sentenceimportance", getFields.none(), async (request, respo
       sendObj
     });
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3102"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3102", error));
   }
 });
@@ -436,6 +442,7 @@ historyRoute.get("/savedwordsearch", getFields.none(), async (request, response)
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3112"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3112", error));
       
   }
@@ -511,7 +518,8 @@ historyRoute.get("/savedsentencesearch", getFields.none(), async (request, respo
     });
 
   } catch (error) {
-    console.log(error);
+
+    logger.error(error.message,  {...commonModules.sendObjSet("3122"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3122", error));
       
   }
@@ -548,6 +556,7 @@ historyRoute.post("/wordlearningfinish", getFields.none(), async (request, respo
       sendObj
     });
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3132"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3132", error));
   }
 });
@@ -624,6 +633,7 @@ historyRoute.get("/learnwordsearch", getFields.none(), async (request, response)
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3142"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3142", error));
       
   }
@@ -673,6 +683,7 @@ historyRoute.get("/learnwordcntsearch", getFields.none(), async (request, respon
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3152"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3152", error));
       
   }
@@ -748,6 +759,7 @@ historyRoute.get("/learnsentencesearch", getFields.none(), async (request, respo
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3162"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3162", error));
       
   }
@@ -797,6 +809,7 @@ historyRoute.get("/learnsentencecntsearch", getFields.none(), async (request, re
     });
 
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3172"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3172", error));
       
   }
@@ -835,6 +848,7 @@ historyRoute.post("/sentencelearningfinish", getFields.none(), async (request, r
       sendObj
     });
   } catch (error) {
+    logger.error(error.message,  {...commonModules.sendObjSet("3132"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3132", error));
   }
 });

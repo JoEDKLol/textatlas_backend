@@ -11,6 +11,7 @@ const Dictionaries = require("../models/dictionarySchemas");
 const ObjectId = require("mongoose").Types.ObjectId;
 const Messages = require("../models/messageSchemas");
 const sequence = require("../utils/sequences");
+const logger = require('../utils/logger');
 
 //쪽지함 조회 - 전체
 messageRoute.get("/messagelistsearch", getFields.none(), async (request, response) => {
@@ -58,6 +59,7 @@ messageRoute.get("/messagelistsearch", getFields.none(), async (request, respons
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3332"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3332", error));
       
   }
@@ -111,6 +113,7 @@ messageRoute.post("/messagesend", getFields.none(), async (request, response) =>
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3342"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3342", error));
       
   }
@@ -166,6 +169,7 @@ messageRoute.post("/receivemessagecheck", getFields.none(), async (request, resp
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3352"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3352", error));
       
   }
@@ -196,6 +200,7 @@ messageRoute.get("/unreadmessagecnt", getFields.none(), async (request, response
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3362"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3362", error));
       
   }
@@ -259,6 +264,7 @@ messageRoute.post("/deletemessage", getFields.none(), async (request, response) 
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3372"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3372", error));
       
   }
@@ -309,6 +315,7 @@ messageRoute.get("/resmessagelistallsearch", getFields.none(), async (request, r
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3382"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3382", error));
       
   }
@@ -359,6 +366,7 @@ messageRoute.get("/sendmessagelistallsearch", getFields.none(), async (request, 
 
   } catch (error) {
     // console.log(error);
+    logger.error(error.message,  {...commonModules.sendObjSet("3392"), stack:error.stack});
     response.status(500).send(commonModules.sendObjSet("3392", error));
       
   }

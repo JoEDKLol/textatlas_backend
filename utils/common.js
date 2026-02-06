@@ -26,6 +26,10 @@ const codes = [
     {code:"1051", msg:"로그인 실패", yn:"n"},
     {code:"1052", msg:"로그인 시도 횟수 초과", yn:"n"},
 
+    {code:"1050g", msg:"구글 로그인 성공", yn:"y"},
+    {code:"1051g", msg:"구글 로그인 실패", yn:"n"},
+    {code:"1052g", msg:"로그인 시도 횟수 초과", yn:"n"},
+
     {code:"1060", msg:"사용자 선호 번역언어 업데이트 성공", yn:"y"},
     {code:"1061", msg:"사용자 선호 번역언어 업데이트 실패", yn:"n"},
     {code:"1062", msg:"Internal Server Error", yn:"n"},
@@ -87,6 +91,10 @@ const codes = [
     {code:"9120", msg:"Image and userimg delete success.", yn:"y"},
     {code:"9121", msg:"Image and userimg delete failed", yn:"n"},
     {code:"9122", msg:"Internal Server Error", yn:"n"},
+
+    {code:"9130", msg:"문의사항 전송 성공.", yn:"y"},
+    {code:"9131", msg:"문의사항 전송 실패", yn:"n"},
+    {code:"9132", msg:"Internal Server Error", yn:"n"},
 
 
     {code:"3000", msg:"books 조회 성공", yn:"y"},
@@ -267,6 +275,10 @@ const codes = [
     {code:"3431", msg:"홈화면에서 책리스트 및 커뮤니티리스트 조회 실패", yn:"y"},
     {code:"3432", msg:"Internal Server Error", yn:"y"},
 
+    {code:"3440", msg:"책 읽기 완료 저장 성공", yn:"y"},
+    {code:"3441", msg:"책 읽기 완료 저장 실패", yn:"y"},
+    {code:"3442", msg:"Internal Server Error", yn:"y"},
+
 
 
 ]
@@ -325,7 +337,7 @@ const getDateStringYYYYMM = () => {
   const now = new Date();
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, '0'); // 0부터 시작하므로 +1
-  return `${yyyy}${mm}`; // e.g., "20250430"
+  return `${yyyy}${mm}`; // e.g., "202504"
 };
 
 const getDateStringYYYYMMDDhhmmss = () => {
